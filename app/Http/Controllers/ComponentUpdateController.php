@@ -30,13 +30,21 @@ class ComponentUpdateController extends Controller
 
         $component = Component::where('id', $request->component_id)->first();
 
-        $component->update([
-            'stock' => $component->stock + $request->quantity,
-            'purchase_price' => $request->purchase_price,
-            'estimated_value' => $request->estimated_value,
-            'percentage' => $request->percentage,
-            'sale_price' => $request->sale_price,
-        ]);
+        if($component->estimated_value < $request->estimated_value && $component->sale_price < $request->sale_price){
+            $component->update([
+                'stock' => $component->stock + $request->quantity,
+                'purchase_price' => $request->purchase_price,
+                'estimated_value' => $request->estimated_value,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+            ]);
+
+        }
+        else{
+            $component->update([
+                'stock' => $component->stock + $request->quantity,
+            ]);
+        }
     }
 
     /**

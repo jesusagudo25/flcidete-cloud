@@ -12,8 +12,11 @@ class Thread extends Model
     protected $fillable = [
         'name',
         'estimated_value',
+        'estimated_value_base',
         'price_purchase',
+        'price_purchase_base',
         'purchased_amount',
+        'purchased_amount_base',
     ];
 
     public function suEmbroideries(){

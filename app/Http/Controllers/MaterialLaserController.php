@@ -25,7 +25,28 @@ class MaterialLaserController extends Controller
      */
     public function store(Request $request)
     {
-        MaterialLaser::create($request->all());
+        $material = MaterialLaser::create($request->all());
+
+        $material->area = $request->area * $request->quantity;
+
+        $material->save();
+
+        //Por mejorar presentacion del stock
+
+        /* Quantitity MaterialLaserUpdates */
+        if ($request->has('quantity') && $request->quantity > 1) {
+            $quantity = $request->quantity;
+            for ($i = 0; $i < $quantity - 1; $i++) {
+                $material->laserUpdates()->create([
+                    'material_laser_id' => $material->id,
+                    'cost' => $request->cost,
+                    'purchase_price' => $request->purchase_price,
+                    'estimated_value' => $request->estimated_value,
+                    'percentage' => $request->percentage,
+                    'sale_price' => $request->sale_price,
+                ]);
+            }
+        }
     }
 
     /**

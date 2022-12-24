@@ -25,7 +25,27 @@ class ResinController extends Controller
      */
     public function store(Request $request)
     {
-        Resin::create($request->all());
+        $resin = Resin::create($request->all());
+
+        $resin->current_weight = $resin->current_weight * $request->quantity;
+
+        $resin->save();
+
+        //Por mejorar presentacion del stock
+        
+        /* Quantitity ResinUpdates */
+        if ($request->has('quantity') && $request->quantity > 1) {
+            $quantity = $request->quantity;
+            for ($i = 0; $i < $quantity - 1; $i++) {
+                $resin->resinUpdates()->create([
+                    'resin_id' => $resin->id,
+                    'purchase_price' => $request->purchase_price,
+                    'estimated_value' => $request->estimated_value,
+                    'percentage' => $request->percentage,
+                    'sale_price' => $request->sale_price,
+                ]);
+            }
+        }
     }
 
     /**

@@ -10,11 +10,15 @@ class SoftwareUpdate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'software_id',
+        'softwares_id',
         'purchased_date',
-        'purchased_date',
+        'purchase_price',
         'expiration_date',
         'sale_price',
         'estimated_value',
     ];
+
+    public function software(){
+        return $this->belongsTo('App\Models\Software', 'softwares_id', 'id');
+    }
 }

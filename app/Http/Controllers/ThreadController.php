@@ -25,7 +25,19 @@ class ThreadController extends Controller
      */
     public function store(Request $request)
     {
-        Thread::create($request->all());
+        $thread = Thread::create($request->all());
+
+        /* Quantitity ThreadUpdates */
+        if($request->has('quantity') && $request->quantity > 1) {
+            $quantity = $request->quantity;
+            for ($i=0; $i < $quantity -1; $i++) { 
+                $thread->threadUpdates()->create([
+                    'thread_id' => $thread->id,
+                    'estimated_value' => $request->estimated_value,
+                    'purchase_price' => $request->price_purchase
+                ]);
+            }
+        }
     }
 
     /**

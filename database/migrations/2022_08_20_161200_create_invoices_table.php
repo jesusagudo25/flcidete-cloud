@@ -28,9 +28,9 @@ return new class extends Migration
             $table->decimal('labor_time',4,2)->nullable();
             $table->decimal('total', 6, 2);
             /*
-            * A = Active
-            * C = Cancelled
-            * F = Finished
+            * A = Active: Una factura es activa cuando se crea y se puede editar (Contrario a cuando se finaliza inmediatamente)
+            * C = Cancelled: Una factura es cancelada cuando su estado es A y se desactiva (No se puede volver a activar)
+            * F = Finished: Una factura es finalizada cuando su venta se ha completado, puede ser al momento de la venta o despues de mantener la factura en estado A
             */
             $table->char('status', 1)->default('A');
             $table->timestamps();

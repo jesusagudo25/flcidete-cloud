@@ -20,7 +20,6 @@ class ReasonVisitController extends Controller
     public function indexBookings()
     {
         return ReasonVisit::where([
-            ['id','<>', 5, ],
             ['id','<>', 3, ],
         ])->get();
     }

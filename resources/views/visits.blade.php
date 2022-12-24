@@ -25,7 +25,7 @@
         margin-top: 10px;
     }
 
-    .mt-30{
+    .mt-30 {
         margin-top: 30px;
     }
 
@@ -130,7 +130,7 @@
     <div class="add-detail">
         <div class="w-50 float-left mt-10">
             <p class="m-0 pt-5 text-bold w-100">Reporte - <span class="gray-color">#{{ $report->id }}</span></p>
-            <p class="m-0 pt-5 text-bold w-100">Tipo - <span class="gray-color">Visitas</span></p>
+            <p class="m-0 pt-5 text-bold w-100">Tipo - <span class="gray-color">Visitas y Reservaciones</span></p>
             <p class="m-0 pt-5 text-bold w-100">Usuario - <span class="gray-color">{{ $report->user->name }}</span>
             </p>
 
@@ -247,9 +247,27 @@
                 </tr>
             @endforeach
         </table>
+
+        <div style="clear: both;"></div>
+
+        <table class="table w-48 mt-10" style="float: right; margin: -50px 0px 0 0">
+            <tr>
+                <th class="w-50">Reservas por estado</th>
+                <th class="w-15">Total</th>
+            </tr>
+            <tr align="center">
+                <td>Ejecutadas</td>
+                <td>{{ $totalBookingsD }}</td>
+            </tr>
+            <tr align="center">
+                <td>Canceladas</td>
+                <td>{{ $totalBookingsC }}</td>
+            </tr>
+        </table>
     </div>
 
     <div style="clear: both;"></div>
+
 
     @if ($observations->count() > 0)
         <div class="table-section bill-tbl w-100 mt-30">
@@ -262,6 +280,16 @@
                         <li>{{ $observation->title }} - {{ $observation->description }} -
                             {{ $observation->created_at }}</li>
                     @endforeach
+                </ol>
+            </div>
+        </div>
+    @else
+        <div class="table-section bill-tbl w-100 mt-30">
+            <div>
+                <p class="m-0 pt-5 text-bold w-100">Observaciones</span>
+                </p>
+                <ol>
+                    <li>No hay observaciones</li>
                 </ol>
             </div>
         </div>

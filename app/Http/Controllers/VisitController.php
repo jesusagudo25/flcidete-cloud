@@ -144,10 +144,11 @@ class VisitController extends Controller
                 });
             }
         } else {
+            //Se debe traer los visitantes de la reserva
+            $booking = Booking::find($booking_id);
+            $booking->status = 'D';
+            $booking->save();
             if ($request->type == 'G') {
-
-                //Se debe traer los visitantes de la reserva
-                $booking = Booking::find($booking_id);
                 $booking->customers()->each(function ($customer, $key) use (&$customers) {
                     $customers[] = $customer->id;
                 });

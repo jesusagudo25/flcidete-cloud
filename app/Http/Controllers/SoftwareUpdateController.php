@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Software;
 use App\Models\SoftwareUpdate;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,7 @@ class SoftwareUpdateController extends Controller
      */
     public function index()
     {
-        //
+        return SoftwareUpdate::all();
     }
 
     /**
@@ -25,7 +26,28 @@ class SoftwareUpdateController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $quantity = $request->quantity;
+        for ($i = 0; $i < $quantity; $i++) {
+            SoftwareUpdate::create($request->all());
+        }
+
+        $software = Software::where('id', $request->softwares_id)->first();
+
+        if($software->estimated_value < $request->estimated_value && $software->sale_price < $request->sale_price){
+            $software->update([
+                'purchase_price' => $request->purchase_price,
+                'estimated_value' => $request->estimated_value,
+                'sale_price' => $request->sale_price,
+                'purchased_date' => $request->purchased_date,
+                'expiration_date' => $request->expiration_date,
+            ]);
+        }
+        else{
+            $software->update([
+                'purchased_date' => $request->purchased_date,
+                'expiration_date' => $request->expiration_date,
+            ]);
+        }
     }
 
     /**
@@ -48,7 +70,9 @@ class SoftwareUpdateController extends Controller
      */
     public function update(Request $request, SoftwareUpdate $softwareUpdate)
     {
-        //
+        SoftwareUpdate::where('id', $softwareUpdate->id)->update([
+            'active' => $request->active,
+        ]);
     }
 
     /**

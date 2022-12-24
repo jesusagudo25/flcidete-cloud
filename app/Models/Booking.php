@@ -16,6 +16,7 @@ class Booking extends Model
         'reason_visit_id',
         'type',
         'date',
+        'status'
     ];
 
     public function reasonVisit(){

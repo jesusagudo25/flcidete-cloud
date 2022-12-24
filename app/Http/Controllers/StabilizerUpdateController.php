@@ -26,12 +26,15 @@ class StabilizerUpdateController extends Controller
      */
     public function store(Request $request)
     {
-        StabilizerUpdate::create($request->all());
+        $quantity = $request->quantity;
+        for ($i = 0; $i < $quantity; $i++) {
+            StabilizerUpdate::create($request->all());
+        }
 
         $stabilizer = Stabilizer::where('id', $request->stabilizer_id)->first();
 
         $stabilizer->update([
-            'area' => $stabilizer->area + ($stabilizer->width * $stabilizer->height),
+            'area' => $stabilizer->area + (($stabilizer->width * $stabilizer->height) * $request->quantity),
             'purchase_price' => $request->purchase_price,
             'estimated_value' => $request->estimated_value
         ]);

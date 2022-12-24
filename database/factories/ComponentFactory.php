@@ -19,11 +19,15 @@ class ComponentFactory extends Factory
         return [
             'name' => $this->faker->name,
             'purchase_price' => $this->faker->randomFloat(2, 1, 20),
+            'purchase_price_base' => $this->faker->randomFloat(2, 1, 20),
             'estimated_value' => $this->faker->randomFloat(2, 1, 20),
+            'estimated_value_base' => $this->faker->randomFloat(2, 1, 20),
             'percentage' => $this->faker->randomNumber(2),
-            'quantity' => 5,
+            'percentage_base' => $this->faker->randomNumber(2),
             'sale_price' => $this->faker->randomFloat(2, 25, 30),
+            'sale_price_base' => $this->faker->randomFloat(2, 25, 30),
             'component_category_id' => $this->faker->numberBetween(1, 10),
+            'quantity' => 5,
             'stock' => 5,
         ];
     }

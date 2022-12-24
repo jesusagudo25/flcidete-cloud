@@ -26,6 +26,7 @@ use App\Http\Controllers\ResinController;
 use App\Http\Controllers\ResinUpdateController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SoftwareController;
+use App\Http\Controllers\SoftwareUpdateController;
 use App\Http\Controllers\StabilizerController;
 use App\Http\Controllers\StabilizerUpdateController;
 use App\Http\Controllers\TechExpenseController;
@@ -255,6 +256,14 @@ Route::controller(SoftwareController::class)->group(function(){
     Route::delete('/softwares/{software}', 'destroy');
 });
 
+Route::controller(SoftwareUpdateController::class)->group(function(){
+    Route::get('/softwares-updates', 'index');
+    Route::get('/softwares-updates/{softwareUpdate}', 'show');
+    Route::post('/softwares-updates', 'store');
+    Route::put('/softwares-updates/{softwareUpdate}', 'update');
+    Route::delete('/softwares-updates/{softwareUpdate}', 'destroy');
+});
+
 Route::controller(ThreadController::class)->group(function(){
     Route::get('/threads', 'index');
     Route::get('/threads/{thread}', 'show');
@@ -360,7 +369,9 @@ Route::controller(BookingController::class)->group(function(){
     Route::get('/bookings/{booking}', 'show');
     Route::get('/bookings/{startStr}/{endStr}/','showSchedule');
     Route::get('/bookings/s/{type}/{search}/', 'search');
+    Route::get('/bookings/{booking}/customers/pdf', 'pdf');
     Route::post('/bookings', 'store');
+    Route::post('/bookings/put', 'storePut');
     Route::put('/bookings/{booking}', 'update');
     Route::delete('/bookings/{booking}', 'destroy');
 });

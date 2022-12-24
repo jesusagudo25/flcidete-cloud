@@ -12,10 +12,15 @@ class Filament extends Model
     protected $fillable = [
         'name',
         'estimated_value',
+        'estimated_value_base',
         'purchase_price',
+        'purchase_price_base',
         'percentage',
+        'percentage_base',
         'sale_price',
+        'sale_price_base',
         'purchased_weight',
+        'purchased_weight_base',
         'current_weight',
     ];
 

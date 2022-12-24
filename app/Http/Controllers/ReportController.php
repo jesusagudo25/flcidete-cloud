@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AgeRange;
 use App\Models\Area;
+use App\Models\Booking;
 use App\Models\Component;
 use App\Models\ComponentUpdate;
 use App\Models\Filament;
@@ -53,9 +54,24 @@ class ReportController extends Controller
      */
     public function store(Request $request)
     {
+        $months = [
+            '01' => 'Enero',
+            '02' => 'Febrero',
+            '03' => 'Marzo',
+            '04' => 'Abril',
+            '05' => 'Mayo',
+            '06' => 'Junio',
+            '07' => 'Julio',
+            '08' => 'Agosto',
+            '09' => 'Septiembre',
+            '10' => 'Octubre',
+            '11' => 'Noviembre',
+            '12' => 'Diciembre',
+        ];
+
         $report = Report::create([
             'user_id' => $request->user_id,
-            'month' => Carbon::parse($request->start_date)->format('M'),
+            'month' => $months[Carbon::parse($request->start_date)->format('m')],
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'type' => $request->type,
@@ -105,6 +121,9 @@ class ReportController extends Controller
     public function pdf(Report $report)
     {
         /* ------------------------------- Visits ----------------------------------------------------*/
+        /* Add 23:60 hours to end_date */
+
+        $report->end_date = Carbon::parse($report->end_date)->addHours(23)->addMinutes(59)->toDateTimeString();
 
         $totalVisits = Visit::whereBetween('created_at', [$report->start_date, $report->end_date])->count();
         $totalTime = Visit::whereBetween('visits.created_at', [$report->start_date, $report->end_date])
@@ -191,6 +210,23 @@ class ReportController extends Controller
 
         $observations = Observation::with('user')->whereBetween('created_at', [$report->start_date, $report->end_date])->get();
 
+
+        /* Bookings */
+
+        $totalBookings = Booking::whereBetween('created_at', [$report->start_date, $report->end_date])->count();
+
+        /* Booking status D */
+
+        $totalBookingsD = Booking::whereBetween('date', [$report->start_date, $report->end_date])
+            ->where('status', 'D')
+            ->count();
+
+        /* Booking status C */
+
+        $totalBookingsC = Booking::whereBetween('date', [$report->start_date, $report->end_date])
+            ->where('status', 'C')
+            ->count();
+
         /* ------------------------------- Sales ----------------------------------------------------*/
 
         /* Informacion basica */
@@ -263,6 +299,10 @@ class ReportController extends Controller
 
         $SUMIncome = $SUMIncome->merge($SUMIncomeNotShow);
 
+        /* Tech expenses - name and expenses*/
+
+        $techExpenses = TechExpense::with('area')->whereBetween('tech_expenses.created_at', [$report->start_date, $report->end_date])
+            ->get();
         /* Egresos en areas */
 
         /* Bordadora */
@@ -423,26 +463,10 @@ class ReportController extends Controller
             return $item;
         });
 
-        /* Gastos tecnicos por area */
-
-        $technicalExpenses = TechExpense::whereBetween('tech_expenses.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(tech_expenses.amount) as egresos, areas.id, areas.name')
-            ->join('areas', 'areas.id', '=', 'tech_expenses.area_id')
-            ->groupBy('areas.id')
-            ->orderBy('egresos', 'asc')
-            ->get();
-
-        $SUMIncome = $SUMIncome->map(function ($item) use ($technicalExpenses) {
-            foreach ($technicalExpenses as $technicalExpense) {
-                if ($item->id == $technicalExpense->id) {
-                    $item->egresos += $technicalExpense->egresos;
-                }
-            }
-            return $item;
-        });
+        $report->end_date = date('Y-m-d', strtotime($report->end_date));
 
         $type = match ($report->type) {
-            'i' => function () use ($report, $totalSalesEvents, $useMachines, $SUMIncome, $totalSalesMaker, $totalSalesServices, $eventsExpensesIncome) {
+            'c' => function () use ($report, $totalSalesEvents, $useMachines, $SUMIncome, $totalSalesMaker, $totalSalesServices, $eventsExpensesIncome, $techExpenses) {
                 /* Faltaria calcular totales */
                 $pdf = PDF::loadView('inventary', [
                     'report' => $report,
@@ -452,10 +476,11 @@ class ReportController extends Controller
                     'totalSalesMaker' => $totalSalesMaker,
                     'totalSalesServices' => $totalSalesServices,
                     'eventsExpensesIncome' => $eventsExpensesIncome->sortBy('name')->values()->all(),
+                    'techExpenses' => $techExpenses->sortBy('name')->values()->all(),
                 ]);
                 return $pdf->stream();
             },
-            'v' =>  function () use ($report, $totalVisits, $totalTime, $customersTop, $districtsTop, $timeDifferentAreas, $timeDifferentReasonVisit, $ageRangeTotal, $typeSexesTotal, $observations) {
+            'v' =>  function () use ($report, $totalVisits, $totalTime, $customersTop, $districtsTop, $timeDifferentAreas, $timeDifferentReasonVisit, $ageRangeTotal, $typeSexesTotal, $observations, $totalBookingsD, $totalBookingsC) {
                 $pdf = PDF::loadView('visits', [
                     'report' => $report,
                     'totalVisits' => $totalVisits,
@@ -467,10 +492,12 @@ class ReportController extends Controller
                     'ageRangeTotal' => $ageRangeTotal->sortBy('name')->values()->all(),
                     'typeSexesTotal' => $typeSexesTotal->sortBy('name')->values()->all(),
                     'observations' => $observations,
+                    'totalBookingsD' => $totalBookingsD,
+                    'totalBookingsC' => $totalBookingsC,
                 ]);
                 return $pdf->stream();
             },
-            default =>  function () use ($report, $totalVisits, $totalTime, $customersTop, $districtsTop, $timeDifferentAreas, $timeDifferentReasonVisit, $ageRangeTotal, $typeSexesTotal, $observations, $totalSalesEvents, $useMachines, $SUMIncome, $totalSalesMaker, $totalSalesServices, $eventsExpensesIncome) {
+            default =>  function () use ($report, $totalVisits, $totalTime, $customersTop, $districtsTop, $timeDifferentAreas, $timeDifferentReasonVisit, $ageRangeTotal, $typeSexesTotal, $observations, $totalBookingsD, $totalBookingsC, $totalSalesEvents, $useMachines, $SUMIncome, $totalSalesMaker, $totalSalesServices, $eventsExpensesIncome, $techExpenses) {
                 $pdf = PDF::loadView('general', [
                     'report' => $report,
                     'totalVisits' => $totalVisits,
@@ -482,12 +509,15 @@ class ReportController extends Controller
                     'ageRangeTotal' => $ageRangeTotal->sortBy('name')->values()->all(),
                     'typeSexesTotal' => $typeSexesTotal->sortBy('name')->values()->all(),
                     'observations' => $observations,
+                    'totalBookingsD' => $totalBookingsD,
+                    'totalBookingsC' => $totalBookingsC,
                     'totalSalesEvents' => $totalSalesEvents,
                     'totalSalesSUM' => $useMachines,
                     'SUMIncome' => $SUMIncome,
                     'totalSalesMaker' => $totalSalesMaker,
                     'totalSalesServices' => $totalSalesServices,
                     'eventsExpensesIncome' => $eventsExpensesIncome->sortBy('name')->values()->all(),
+                    'techExpenses' => $techExpenses->sortBy('name')->values()->all(),
                 ]);
                 return $pdf->stream();
             }

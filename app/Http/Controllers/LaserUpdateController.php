@@ -26,18 +26,28 @@ class LaserUpdateController extends Controller
      */
     public function store(Request $request)
     {
-        LaserUpdate::create($request->all());
+        $quantity = $request->quantity;
+        for ($i = 0; $i < $quantity; $i++) {
+            LaserUpdate::create($request->all());
+        }
 
         $laser = MaterialLaser::where('id', $request->material_laser_id)->first();
 
-        $laser->update([
-            'area' => $laser->area + ($laser->width * $laser->height),
-            'cost' => $request->cost,
-            'purchase_price' => $request->purchase_price,
-            'estimated_value' => $request->estimated_value,
-            'percentage' => $request->percentage,
-            'sale_price' => $request->sale_price,
-        ]);
+        if($laser->estimated_value < $request->estimated_value && $laser->sale_price < $request->sale_price){
+            $laser->update([
+                'area' => $laser->area + ($laser->width * $laser->height) * $request->quantity,
+                'cost' => $request->cost,
+                'purchase_price' => $request->purchase_price,
+                'estimated_value' => $request->estimated_value,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+            ]);
+        }
+        else{
+            $laser->update([
+                'area' => $laser->area + ($laser->width * $laser->height) * $request->quantity,
+            ]);
+        }
     }
 
     /**

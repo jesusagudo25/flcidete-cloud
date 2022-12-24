@@ -6,6 +6,7 @@ use App\Imports\CustomersImport;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Event;
+use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
@@ -128,6 +129,110 @@ class BookingController extends Controller
         }
     }
 
+    public function storePut(Request $request){
+
+        $filename = $request->hasFile('file') ? $request->file('file') : null;
+        $customers = [];
+
+        if (!empty($filename)) {
+            $collectionExcel = Excel::toCollection(new CustomersImport, $filename);
+            collect($collectionExcel[0])->each(function ($item, $key) use (&$customers) {
+
+                $customer = Customer::where('document_number', '=', $item['documento'])->first();
+                if ($customer == null) {
+                    $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
+                    $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
+                    $townships = Http::get('http://127.0.0.1:8001/api/townships')->collect();
+
+                    if ($item['tipo_documento'] == 'Cédula' || substr($item['tipo_documento'], 0, 1) == 'C') {
+                        $item['tipo_documento'] = 'C';
+                    } elseif ($item['tipo_documento'] == 'Pasaporte' || substr($item['tipo_documento'], 0, 1) == 'P') {
+                        $item['tipo_documento'] = 'P';
+                    } else {
+                        $item['tipo_documento'] = 'R';
+                    }
+
+                    if ($item['sexo'] == 'Masculino' || substr($item['sexo'], 0, 1) == 'M') {
+                        $type_sex_id = 1;
+                    } else {
+                        $type_sex_id = 2;
+                    }
+
+                    $age_range_id = null;
+                    if ($item['edad'] <= 18) {
+                        $age_range_id = 1; //1 - 18
+                    } else if ($item['edad']  > 18 && $item['edad'] <= 26) {
+                        $age_range_id = 2; //19 - 26
+                    } else if ($item['edad']  > 26 && $item['edad']  <= 35) {
+                        $age_range_id = 3; //26 - 35
+                    } else {
+                        $age_range_id = 4; //36 +
+                    }
+
+                    $province_id = null;
+                    $district_id = null;
+                    $township_id = null;
+                    $provinces->each(function ($province, $key) use ($item, &$province_id) {
+                        if ($item['provincia'] == $province['name']) {
+                            $province_id = $province['id'];
+                        }
+                    });
+
+                    $districts->each(function ($district, $key) use ($item, &$district_id) {
+                        if ($item['distrito'] == $district['name']) {
+                            $district_id = $district['id'];
+                        }
+                    });
+
+                    $townships->each(function ($township, $key) use ($item, &$township_id) {
+                        if ($item['corregimiento'] == $township['name']) {
+                            $township_id = $township['id'];
+                        }
+                    });
+
+                    $result = Customer::create([
+                        'document_type' => $item['tipo_documento'],
+                        'document_number' => $item['documento'],
+                        'name' => $item['nombre'],
+                        'type_sex_id' => $type_sex_id,
+                        'age_range_id' => $age_range_id,
+                        'telephone' => $item['telefono'],
+                        'email' => $item['correo'],
+                        'province_id' => $province_id,
+                        'district_id' => $district_id,
+                        'township_id' => $township_id,
+                    ]);
+
+                    $customers[] = $result->id;
+                } else {
+                    $customers[] = $customer->id;
+                }
+            });
+        }
+        
+        $booking = Booking::where('id', $request->id)->update([
+            'reason_visit_id' => $request->reason_visit_id,
+            'type' => $request->type,
+            'date' => $request->date,
+            'document_type' => $request->document_type,
+            'document_number' => $request->document_number,
+            'name' => $request->name,
+            'status' => $request->status,
+        ]);
+
+        $booking = Booking::find($request->id);
+
+        if (!empty($customers)) {
+            $booking->customers()->sync($customers);
+        }
+
+        if (!empty($request->areas)) {
+            $booking->areas()->detach();
+            $booking->areas()->attach($request->areas);
+        }
+
+    }
+
     /**
      * Display the specified resource.
      *
@@ -136,14 +241,30 @@ class BookingController extends Controller
      */
     public function show(Booking $booking)
     {
-        //
+        
+    }
+
+    public function pdf(Booking $booking)
+    {
+        $customersBooking = $booking->customers;
+
+        $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
+
+        foreach ($customersBooking as $customer) {
+            $result = $provinces->where('id', $customer->province_id)->first();
+            $customer->province_id = $result['name'];
+        }
+
+        $pdf = PDF::loadView('customersBooking', compact('booking', 'customersBooking'));
+
+        return $pdf->stream();
     }
 
     public function showSchedule($startStr, $endDate,)
     {
-        $bookings = Booking::where('date', '>=', $startStr)->where('date', '<=', $endDate)->join('reason_visits', 'reason_visits.id', '=', 'bookings.reason_visit_id')->select('bookings.*', 'reason_visits.name as reason_visit')->get();
+        $bookings = Booking::with('areas', 'customers')->where('date', '>=', $startStr)->where('date', '<=', $endDate)->join('reason_visits', 'reason_visits.id', '=', 'bookings.reason_visit_id')->select('bookings.*', 'reason_visits.name as reason_visit')->get();
 
-        $events = Event::where('initial_date', '>=', $startStr)->orwhere('final_date', '<=', $endDate)->get();
+        $events = Event::with('eventCategory')->where('initial_date', '>=', $startStr)->orwhere('final_date', '<=', $endDate)->get();
         $data = array();
 
         foreach ($events as $row) {
@@ -160,6 +281,13 @@ class BookingController extends Controller
                     'color' => '#16a34a',
                     'className' => 'event',
                     'startEditable' => false,
+                    'eventCategory' => $row->eventCategory->name,
+                    'initial_date' => $row->initial_date,
+                    'final_date' => $row->final_date,
+                    'initial_time' => $row->initial_time,
+                    'final_time' => $row->final_time,
+                    'price' => $row->price,
+                    'quotas' => $row->quotas,
                 );
             }
         }
@@ -170,9 +298,17 @@ class BookingController extends Controller
                 'title' => $row['reason_visit'],
                 'start' => $row->date,
                 'end' => $row->date,
-                'color' => '#2563eb',
+                'color' => $row->status == 'S' ? '#2563eb' : ($row->status == 'D' ? '#34d399' : '#f87171'),
                 'className' => 'booking',
                 'startEditable' => true,
+                'status' => $row->status,
+                'document_type' => $row->document_type,
+                'document_number' => $row->document_number,
+                'name' => $row->name,
+                'type' => $row->type,
+                'reason_visit_id' => $row->reason_visit_id,
+                'areas' => $row->areas,
+                'customers' => $row->customers,
             );
         }
 
@@ -186,6 +322,7 @@ class BookingController extends Controller
                 ['document_type', '=', $type],
                 ['document_number', 'like', '%' . $search . '%'],
                 ['date', '=', date('Y-m-d')],
+                ['status', '=', 'S'],
             ])
             ->get();
 
@@ -200,7 +337,6 @@ class BookingController extends Controller
      */
     public function update(Request $request, Booking $booking)
     {
-        Booking::where('id', $booking->id)->update($request->all());
     }
 
     /**

@@ -30,13 +30,21 @@ class MillingUpdateController extends Controller
 
         $milling = MaterialMilling::where('id', $request->material_milling_id)->first();
 
-        $milling->update([
-            'stock' => $milling->stock + $request->quantity,
-            'purchase_price' => $request->purchase_price,
-            'estimated_value' => $request->estimated_value,
-            'percentage' => $request->percentage,
-            'sale_price' => $request->sale_price,
-        ]);
+        if($milling->estimated_value < $request->estimated_value && $milling->sale_price < $request->sale_price){
+            $milling->update([
+                'stock' => $milling->stock + $request->quantity,
+                'purchase_price' => $request->purchase_price,
+                'estimated_value' => $request->estimated_value,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+            ]);
+
+        }
+        else{
+            $milling->update([
+                'stock' => $milling->stock + $request->quantity,
+            ]);
+        }
     }
 
     /**

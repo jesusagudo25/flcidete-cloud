@@ -26,10 +26,13 @@ class ThreadUpdateController extends Controller
      */
     public function store(Request $request)
     {
-        ThreadUpdate::create($request->all());
+        $quantity = $request->quantity;
+        for ($i = 0; $i < $quantity; $i++) {
+            ThreadUpdate::create($request->all());
+        }
 
         Thread::where('id', $request->thread_id)->update([
-            'estimated_value' => $request->estimated_value, 
+            'estimated_value' => $request->estimated_value,
             'price_purchase' => $request->purchase_price
         ]);
     }
@@ -55,7 +58,7 @@ class ThreadUpdateController extends Controller
     public function update(Request $request, ThreadUpdate $threadUpdate)
     {
         ThreadUpdate::where('id', $threadUpdate->id)
-        ->update($request->all());
+            ->update($request->all());
     }
 
     /**

@@ -26,17 +26,27 @@ class FilamentUpdateController extends Controller
      */
     public function store(Request $request)
     {
-        FilamentUpdate::create($request->all());
+        $quantity = $request->quantity;
+        for ($i = 0; $i < $quantity; $i++) {
+            FilamentUpdate::create($request->all());
+        }
 
         $filament = Filament::where('id', $request->filament_id)->first();
 
-        $filament->update([
-            'current_weight' => $filament->current_weight + $filament->purchased_weight,
-            'purchase_price' => $request->purchase_price,
-            'estimated_value' => $request->estimated_value,
-            'percentage' => $request->percentage,
-            'sale_price' => $request->sale_price,
-        ]);
+        if($filament->estimated_value < $request->estimated_value && $filament->sale_price < $request->sale_price){
+            $filament->update([
+                'current_weight' => $filament->current_weight + ($filament->purchased_weight * $request->quantity),
+                'purchase_price' => $request->purchase_price,
+                'estimated_value' => $request->estimated_value,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+            ]);
+        }
+        else{
+            $filament->update([
+                'current_weight' => $filament->current_weight + ($filament->purchased_weight * $request->quantity),
+            ]);
+        }
     }
 
     /**

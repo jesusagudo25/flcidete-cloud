@@ -15,7 +15,7 @@ class VinylUpdateController extends Controller
      */
     public function index()
     {
-        //
+        return VinylUpdate::all();
     }
 
     /**
@@ -26,18 +26,37 @@ class VinylUpdateController extends Controller
      */
     public function store(Request $request)
     {
-        VinylUpdate::create($request->all());
+        $quantity = $request->quantity;
+        for ($i = 0; $i < $quantity; $i++) {
+            VinylUpdate::create($request->all());
+        }
 
         $vinyl = Vinyl::where('id', $request->vinyl_id)->first();
 
-        $vinyl->update([
+        if($vinyl->estimated_value < $request->estimated_value && $vinyl->sale_price < $request->sale_price){
+            $vinyl->update([
+                'area' => $vinyl->area + ($vinyl->width * $vinyl->height) * $request->quantity,
+                'cost' => $request->cost,
+                'purchase_price' => $request->purchase_price,
+                'estimated_value' => $request->estimated_value,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+            ]);
+        }
+        else{
+            $vinyl->update([
+                'area' => $vinyl->area + ($vinyl->width * $vinyl->height) * $request->quantity,
+            ]);
+        }
+
+/*         $vinyl->update([
             'area' => $vinyl->area + ($vinyl->width * $vinyl->height),
             'cost' => $request->cost,
             'purchase_price' => $request->purchase_price,
             'estimated_value' => $request->estimated_value,
             'percentage' => $request->percentage,
             'sale_price' => $request->sale_price,
-        ]);
+        ]); */
     }
 
     /**

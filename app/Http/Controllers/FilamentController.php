@@ -25,7 +25,27 @@ class FilamentController extends Controller
      */
     public function store(Request $request)
     {
-        Filament::create($request->all());
+        $filament = Filament::create($request->all());
+
+        $filament->current_weight = $filament->current_weight * $request->quantity;
+
+        $filament->save();
+
+        //Por mejorar presentacion del stock
+
+        /* Quantitity FilamentUpdates */
+        if ($request->has('quantity') && $request->quantity > 1) {
+            $quantity = $request->quantity;
+            for ($i = 0; $i < $quantity - 1; $i++) {
+                $filament->filamentUpdates()->create([
+                    'filament_id' => $filament->id,
+                    'purchase_price' => $request->purchase_price,
+                    'estimated_value' => $request->estimated_value,
+                    'percentage' => $request->percentage,
+                    'sale_price' => $request->sale_price,
+                ]);
+            }
+        }
     }
 
     /**

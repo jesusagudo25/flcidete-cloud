@@ -16,9 +16,16 @@ return new class extends Migration
         Schema::create('threads', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+
+            $table->decimal('estimated_value_base', 8, 2);
             $table->decimal('estimated_value', 8, 2);
+            
+            $table->decimal('price_purchase_base', 10, 2);
             $table->decimal('price_purchase', 10, 2);
+            
+            $table->integer('purchased_amount_base');
             $table->integer('purchased_amount');
+            
             $table->boolean('active')->default(true);
             $table->timestamps();
         });

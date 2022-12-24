@@ -108,7 +108,23 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
-        Event::where('id', $event->id)->update($request->all());
+        Event::where('id', $event->id)->update(
+            [
+                'name' => $request->name,
+                'event_category_id' => $request->event_category_id,
+                'expenses' => $request->expenses,
+                'description_expenses' => $request->description_expenses,
+                'initial_date' => $request->initial_date,
+                'final_date' => $request->final_date,
+                'initial_time' => $request->initial_time,
+                'final_time' => $request->final_time,
+                'max_participants' => $request->max_participants,
+                'price' => $request->price,
+            ]
+        );
+
+        $event->areas()->detach();
+        $event->areas()->attach($request->areas);
     }
 
     /**

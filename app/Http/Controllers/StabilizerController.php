@@ -25,7 +25,25 @@ class StabilizerController extends Controller
      */
     public function store(Request $request)
     {
-        Stabilizer::create($request->all());
+        $stabilizer = Stabilizer::create($request->all());
+
+        $stabilizer->area = $request->area * $request->quantity;
+
+        $stabilizer->save();
+
+        //Por mejorar presentacion del stock
+
+        /* Quantitity StabilizerUpdates */
+        if ($request->has('quantity') && $request->quantity > 1) {
+            $quantity = $request->quantity;
+            for ($i = 0; $i < $quantity - 1; $i++) {
+                $stabilizer->stabilizerUpdates()->create([
+                    'stabilizer_id' => $stabilizer->id,
+                    'estimated_value' => $request->estimated_value,
+                    'purchase_price' => $request->purchase_price
+                ]);
+            }
+        }
     }
 
     /**
@@ -38,7 +56,7 @@ class StabilizerController extends Controller
     {
         return Stabilizer::with('stabilizerUpdates')->find($stabilizer->id);
     }
-    
+
     public function search($search)
     {
         $stabilizers = Stabilizer::where([

@@ -26,17 +26,27 @@ class ResinUpdateController extends Controller
      */
     public function store(Request $request)
     {
-        ResinUpdate::create($request->all());
+        $quantity = $request->quantity;
+        for ($i = 0; $i < $quantity; $i++) {
+            ResinUpdate::create($request->all());
+        }
 
         $resin = Resin::where('id', $request->resin_id)->first();
 
-        $resin->update([
-            'current_weight' => $resin->current_weight + $resin->purchased_weight,
-            'purchase_price' => $request->purchase_price,
-            'estimated_value' => $request->estimated_value,
-            'percentage' => $request->percentage,
-            'sale_price' => $request->sale_price,
-        ]);
+        if($resin->estimated_value < $request->estimated_value && $resin->sale_price < $request->sale_price){
+            $resin->update([
+                'current_weight' => $resin->current_weight + ($resin->purchased_weight * $request->quantity),
+                'purchase_price' => $request->purchase_price,
+                'estimated_value' => $request->estimated_value,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+            ]);
+        }
+        else{
+            $resin->update([
+                'current_weight' => $resin->current_weight + ($resin->purchased_weight * $request->quantity),
+            ]);
+        }
     }
 
     /**

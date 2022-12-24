@@ -25,7 +25,22 @@ class SoftwareController extends Controller
      */
     public function store(Request $request)
     {
-        Software::create($request->all());
+        $software = Software::create($request->all());
+
+        /* Quantitity SoftwareUpdates */
+        if ($request->has('quantity') && $request->quantity > 1) {
+            $quantity = $request->quantity;
+            for ($i = 0; $i < $quantity - 1; $i++) {
+                $software->softwareUpdate()->create([
+                    'softwares_id' => $software->id,
+                    'purchase_price' => $request->purchase_price,
+                    'estimated_value' => $request->estimated_value,
+                    'sale_price' => $request->sale_price,
+                    'purchased_date' => $request->purchased_date,
+                    'expiration_date' => $request->expiration_date,
+                ]);
+            }
+        }
     }
 
     /**
@@ -36,7 +51,7 @@ class SoftwareController extends Controller
      */
     public function show(Software $software)
     {
-        //
+        return Software::with('softwareUpdate')->find($software->id);
     }
 
     public function search($search)
