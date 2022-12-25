@@ -21,6 +21,7 @@ use App\Http\Controllers\MaterialLaserController;
 use App\Http\Controllers\MaterialMillingController;
 use App\Http\Controllers\MillingUpdateController;
 use App\Http\Controllers\ObservationController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResinController;
 use App\Http\Controllers\ResinUpdateController;
@@ -318,11 +319,20 @@ Route::controller(EventCategoryController::class)->group(function(){
 
 Route::controller(InvoiceController::class)->group(function(){
     Route::get('/invoices', 'index');
+    Route::get('/invoices/payments', 'indexPayments');
     Route::get('/invoices/{invoice}', 'show');
     Route::post('/invoices', 'store');
     Route::put('/invoices/{invoice}', 'update');
     Route::delete('/invoices/{invoice}', 'destroy');
     Route::get('/invoices/{invoice}/pdf', 'pdf');
+});
+
+Route::controller(PaymentController::class)->group(function(){
+    Route::get('/payments', 'index');
+    Route::get('/payments/{payment}', 'show');
+    Route::post('/payments', 'store');
+    Route::put('/payments/{payment}', 'update');
+    Route::delete('/payments/{payment}', 'destroy');
 });
 
 /* Reports */

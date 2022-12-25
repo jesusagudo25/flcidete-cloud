@@ -159,26 +159,28 @@
     </div>
     <div class="table-section bill-tbl w-100 mt-10">
         <table class="table w-100 mt-10">
-            @if ($invoice->date_delivery == null)
-                <tr>
-                    <th class="w-50">Método de pago</th>
-                    <th class="w-50">Ejecución</th>
-                </tr>
-                <tr>
-                    <td>Efectivo en caja</td>
-                    <td>Inmediato</td>
-                </tr>
-            @else
-                <tr>
-                    <th class="w-50">Método de pago</th>
-                    <th class="w-50">Tiempo de entrega</th>
-                </tr>
-                <tr>
-                    <td>Efectivo en caja</td>
-                    <td>{{ $invoice->date_delivery }}</td>
-                </tr>
-            @endif
-
+            <tr>
+                <th class="w-50">Método de pago</th>
+                <th class="w-50">Tiempo de entrega</th>
+            </tr>
+            <tr>
+                <td>Efectivo en caja</td>
+                <td>{{ $invoice->date_delivery }}</td>
+            </tr>
+        </table>
+        <table class="table w-100 mt-10">
+            <tr>
+                <th class="w-50">Cantidad abonada</th>
+                <th class="w-50">Balance</th>
+                <th class="w-50">Fecha</th>
+            </tr>
+            @foreach ($payments as $payment)
+            <tr>
+                <td>{{ $payment->payment_amount }}</td>
+                <td>{{ $payment->balance }}</td>
+                <td>{{ $payment->created_at }}</td>
+            </tr>
+            @endforeach
         </table>
     </div>
     <div class="table-section bill-tbl w-100 mt-10">
@@ -188,22 +190,46 @@
                 <th class="w-50">Descripcion</th>
                 <th class="w-15">Total</th>
             </tr>
-            <tr align="center">
-                <td>1</td>
+            <tr>
+                <td style="text-align: center">1</td>
                 <td>{{ $invoice->description}}</td>
-                <td>${{ $invoice->total }}</td>
+                <td style="text-align: center">${{ $invoice->total }}</td>
             </tr>
             <tr>
                 <td colspan="3">
+                    @if ($payments->count() > 1)
                     <div class="total-part">
                         <div class="total-left w-85 float-left" align="right">
+                            <p>Sub total</p>
+                            <p>Abono (50%)</p>
+                            <p>Saldo</p>
                             <p>Total a pagar</p>
                         </div>
                         <div class="total-right w-10 float-left text-bold" align="right">
-                            <p>${{ $invoice->total }}</p>
+                            <p>{{ $invoice->total }}</p>
+                            <p>{{ $payments[1]->payment_amount }}</p>
+                            <p>{{ $payments[1]->balance }}</p>
+                            <p>{{ $payments[1]->payment_amount }}</p>
                         </div>
                         <div style="clear: both;"></div>
-                    </div>
+                    </div> 
+                    @else
+                    <div class="total-part">
+                        <div class="total-left w-85 float-left" align="right">
+                            <p>Sub total</p>
+                            <p>Abono (50%)</p>
+                            <p>Saldo</p>
+                            <p>Total a pagar</p>
+                        </div>
+                        <div class="total-right w-10 float-left text-bold" align="right">
+                            <p>{{ $invoice->total }}</p>
+                            <p>{{ $payments[0]->payment_amount }}</p>
+                            <p>{{ $payments[0]->balance }}</p>
+                            <p>{{ $payments[0]->payment_amount }}</p>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div> 
+                    @endif
                 </td>
             </tr>
         </table>

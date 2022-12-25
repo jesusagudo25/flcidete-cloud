@@ -43,4 +43,9 @@ class Customer extends Model
     public function bookings(){
         return $this->belongsToMany(Booking::class);
     }
+
+    public function quotations(){
+        return $this->hasMany(Quotation::class);
+    }
+    
 }

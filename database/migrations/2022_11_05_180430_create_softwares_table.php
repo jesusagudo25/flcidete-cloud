@@ -28,9 +28,6 @@ return new class extends Migration
             
             $table->date('purchased_date_base');
             $table->date('purchased_date');
-            
-            $table->date('expiration_date_base');
-            $table->date('expiration_date');
 
             $table->boolean('active')->default(true);
             $table->timestamps();

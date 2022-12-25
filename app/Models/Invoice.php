@@ -17,6 +17,9 @@ class Invoice extends Model
         'date_delivery',
         'labor_time',
         'total',
+        'description',
+        'type_invoice',
+        'status',
     ];
 
     public function user()
@@ -48,4 +51,10 @@ class Invoice extends Model
     {
         return $this->hasMany(SUEmbroidery::class);
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
 }

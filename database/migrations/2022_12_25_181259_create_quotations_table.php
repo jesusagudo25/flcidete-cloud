@@ -13,16 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('software_updates', function (Blueprint $table) {
+        Schema::create('quotations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('softwares_id')->constrained()
+            $table->foreignId('customer_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->decimal('estimated_value', 8, 2);
-            $table->decimal('purchase_price', 10, 2);
-            $table->decimal('sale_price', 10, 2); //hourly rate
-            $table->date('purchased_date');
-            $table->boolean('active')->default(true);
+            $table->foreignId('user_id')->constrained()
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->text('description')->nullable();
+            $table->decimal('total', 6, 2);
             $table->timestamps();
         });
     }
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('software_updates');
+        Schema::dropIfExists('quotations');
     }
 };

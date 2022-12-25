@@ -21,8 +21,6 @@ class Software extends Model
         'sale_price_base',
         'purchased_date',
         'purchased_date_base',
-        'expiration_date',
-        'expiration_date_base',
     ];
 
     public function suss(){

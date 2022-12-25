@@ -10,7 +10,9 @@ use App\Models\Filament;
 use App\Models\Invoice;
 use App\Models\MaterialLaser;
 use App\Models\MaterialMilling;
+use App\Models\Payment;
 use App\Models\Resin;
+use App\Models\Stabilizer;
 use App\Models\SUEmbroidery;
 use App\Models\SUM;
 use App\Models\SUS;
@@ -29,7 +31,16 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        return Invoice::with('customer', 'user')->get();
+        return Invoice::with('customer', 'user')->where('type_invoice', 'T')->get();
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexPayments(){
+        return Invoice::with('customer', 'user','payments')->where('type_invoice', 'A')->get();
     }
 
     /**
@@ -54,9 +65,21 @@ class InvoiceController extends Controller
             'user_id' => $request->id,
             'total' => $request->total,
             'type_sale' => $request->typeSale,
-            'labor_time' => empty($request->laborTime) ? 0 : $request->laborTime,
-            'date_delivery' => $request->dateDelivery,
+            'type_invoice' => $request->typeInvoice,
+            'labor_time' => empty($request->laborTime) ? null : $request->laborTime,
+            'date_delivery' => empty($request->dateDelivery) ? null : $request->dateDelivery,
+            'description' => empty($request->description) ? null : $request->description,
+            'status' => $request->typeInvoice == 'A' ? 'A' : 'F',
         ]);
+
+        if($request->typeInvoice == 'A'){
+            Payment::create([
+                'invoice_id' => $invoice->id,
+                'payment_amount' => $request->payment,
+                'balance' => $request->balance,
+            ]);
+
+        }
 
         foreach ($request->items as $item) {
 
@@ -73,7 +96,7 @@ class InvoiceController extends Controller
             }
 
             if ($item['category_service'] == 'a') {
-                if ($item['name'] == 'Software de diseño') {
+                if ($item['name'] == 'Softwares') {
                     $sum = SUS::create([
                         'invoice_id' => $invoice->id,
                         'area_id' => $item['id_service'],
@@ -91,6 +114,7 @@ class InvoiceController extends Controller
                         'stabilizer_id' => $item['details']['stabilizer']['id'],
                         'hoop_size' => isset($item['details']['hoop_size']) ? $item['details']['hoop_size'] : null,
                         'embroidery_size' => isset($item['details']['width']) && isset($item['details']['height']) ? $item['details']['width'] . 'x' . $item['details']['height'] : null,
+
                         'embroidery_cost' => isset($item['details']['embroidery_cost']) ? $item['details']['embroidery_cost'] : null,
                         'number_hours' => $number_hours,
                         'cost_hour' => isset($item['details']['cost_hours']) ? $item['details']['cost_hours'] : null,
@@ -231,6 +255,42 @@ class InvoiceController extends Controller
                                 $sum->threads()->attach($thread['id']);
                             }
                         }
+
+                        if(isset($valor['details']['stabilizer'])){
+                            $stabilizerSelected = Stabilizer::find($valor['details']['stabilizer']['id']);
+                            //Validate quantity
+                            if($valor['details']['quantity']){
+                                $area = ($valor['details']['width'] * $valor['details']['height']) * $valor['details']['quantity'];
+
+                                if ($stabilizerSelected->area >=  $area) {
+                                    $stabilizerSelected->area = $stabilizerSelected->area - $area;
+                                    $stabilizerSelected->area == 0 ? $stabilizerSelected->active = 0 : $stabilizerSelected->active = 1;
+                                    $stabilizerSelected->save();
+                                }
+                                else{
+                                    return response()->json([
+                                        'message' => 'No hay suficiente stock del estabilizador '
+                                    ], 400);
+                                }
+                            }
+                            else{
+                                //Feet to inch
+                                $heightInch = $valor['details']['height'] * 12;
+                                $area = $valor['details']['width'] * $heightInch;
+
+                                if ($stabilizerSelected->area >=  $area) {
+                                    $stabilizerSelected->area = $stabilizerSelected->area - $area;
+                                    $stabilizerSelected->area == 0 ? $stabilizerSelected->active = 0 : $stabilizerSelected->active = 1;
+                                    $stabilizerSelected->save();
+                                }
+                                else{
+                                    return response()->json([
+                                        'message' => 'No hay suficiente stock del estabilizador '
+                                    ], 400);
+                                }
+                            }
+                            
+                        }
                     },
                     default => function ($valor){
                     }
@@ -289,7 +349,6 @@ class InvoiceController extends Controller
 
     public function pdf(Invoice $invoice)
     {
-
         $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
         $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
         $townships = Http::get('http://127.0.0.1:8001/api/townships')->collect();
@@ -318,14 +377,13 @@ class InvoiceController extends Controller
             }
         });
 
-        $items = [];
+        if($invoice->type_invoice == 'T'){
+            $pdf = PDF::loadView('invoice', with(['invoice' => $invoice, 'user' => $invoice->user, 'customer' => $customer, 'province_id' => $province_id, 'district_id' => $district_id, 'township_id' => $township_id]));
+        }
+        else{
+            $pdf = PDF::loadView('payment', with(['invoice' => $invoice, 'user' => $invoice->user, 'customer' => $customer, 'province_id' => $province_id, 'district_id' => $district_id, 'township_id' => $township_id, 'payments' => $invoice->payments]));
+        }
 
-        $items[] = SUM::where('invoice_id', $invoice->id)->with('area')->get();
-        $items[] = SUS::where('invoice_id', $invoice->id)->with('area')->get();
-        $items[] = $invoice->events()->get();
-        $items[] = SUEmbroidery::where('invoice_id', $invoice->id)->with('area')->get();
-
-        $pdf = PDF::loadView('invoice', with(['invoice' => $invoice, 'user' => $invoice->user, 'customer' => $customer, 'items' => $items, 'province_id' => $province_id, 'district_id' => $district_id, 'township_id' => $township_id]));
         return $pdf->stream();
     }
 }
