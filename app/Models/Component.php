@@ -14,15 +14,10 @@ class Component extends Model
         'name',
         'component_category_id',
         'estimated_value',
-        'estimated_value_base',
         'purchase_price',
-        'purchase_price_base',
         'percentage',
-        'percentage_base',
         'sale_price',
-        'sale_price_base',
         'stock',
-        'quantity'
     ];
 
     public function sums(){

@@ -82,9 +82,17 @@ class LaserUpdateController extends Controller
             ]);
         }
         else{
-            $laser->update([
-                'area' => $laser->area - ($laser->width * $laser->height),
-            ]);
+            $area = $laser->area - ($laser->width * $laser->height);
+            if($area < 0){
+                $laser->update([
+                    'area' => 0,
+                ]);
+            }
+            else{
+                $laser->update([
+                    'area' => $area,
+                ]);            
+            }
         }
     }
 

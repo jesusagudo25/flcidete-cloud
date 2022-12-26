@@ -38,14 +38,6 @@ class SoftwareUpdateController extends Controller
                 'purchase_price' => $request->purchase_price,
                 'estimated_value' => $request->estimated_value,
                 'sale_price' => $request->sale_price,
-                'purchased_date' => $request->purchased_date,
-                'expiration_date' => $request->expiration_date,
-            ]);
-        }
-        else{
-            $software->update([
-                'purchased_date' => $request->purchased_date,
-                'expiration_date' => $request->expiration_date,
             ]);
         }
     }

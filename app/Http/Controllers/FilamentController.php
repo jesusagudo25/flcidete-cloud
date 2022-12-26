@@ -34,9 +34,9 @@ class FilamentController extends Controller
         //Por mejorar presentacion del stock
 
         /* Quantitity FilamentUpdates */
-        if ($request->has('quantity') && $request->quantity > 1) {
+        if ($request->has('quantity')) {
             $quantity = $request->quantity;
-            for ($i = 0; $i < $quantity - 1; $i++) {
+            for ($i = 0; $i < $quantity; $i++) {
                 $filament->filamentUpdates()->create([
                     'filament_id' => $filament->id,
                     'purchase_price' => $request->purchase_price,
@@ -85,8 +85,35 @@ class FilamentController extends Controller
      */
     public function update(Request $request, Filament $filament)
     {
-        Filament::where('id', $filament->id)
-            ->update($request->all());
+        $filamentUpdates = $filament->filamentUpdates()->where('active',1)->count();
+        if($filamentUpdates > 0){
+            if($request->purchased_weight != $filament->purchased_weight){
+                Filament::where('id', $filament->id)->update($request->all());
+
+                $filament->current_weight = $request->purchase_weight * $filamentUpdates;
+    
+                $filament::where('id', $filament->id)->update($filament->current_weight);
+            }
+            else{
+                Filament::where('id', $filament->id)->update([
+                    'name' => $request->name,
+                    'estimated_value' => $request->estimated_value,
+                    'purchase_price' => $request->purchase_price,
+                    'percentage' => $request->percentage,
+                    'sale_price' => $request->sale_price,
+                ]);
+            }
+        }
+        else{
+            Filament::where('id', $filament->id)->update([
+                'name' => $request->name,
+                'estimated_value' => $request->estimated_value,
+                'purchase_price' => $request->purchase_price,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+                'purchased_weight' => $request->purchased_weight,
+            ]);
+        }
     }
 
     /**

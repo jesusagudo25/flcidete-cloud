@@ -22,6 +22,7 @@ use App\Http\Controllers\MaterialMillingController;
 use App\Http\Controllers\MillingUpdateController;
 use App\Http\Controllers\ObservationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResinController;
 use App\Http\Controllers\ResinUpdateController;
@@ -333,6 +334,15 @@ Route::controller(PaymentController::class)->group(function(){
     Route::post('/payments', 'store');
     Route::put('/payments/{payment}', 'update');
     Route::delete('/payments/{payment}', 'destroy');
+});
+
+Route::controller(QuotationController::class)->group(function(){
+    Route::get('/quotations', 'index');
+    Route::get('/quotations/{quotation}', 'show');
+    Route::post('/quotations', 'store');
+    Route::put('/quotations/{quotation}', 'update');
+    Route::delete('/quotations/{quotation}', 'destroy');
+    Route::get('/quotations/{quotation}/pdf', 'pdf');
 });
 
 /* Reports */

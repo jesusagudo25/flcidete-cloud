@@ -11,9 +11,7 @@ class SoftwareUpdate extends Model
 
     protected $fillable = [
         'softwares_id',
-        'purchased_date',
         'purchase_price',
-        'expiration_date',
         'sale_price',
         'estimated_value',
     ];

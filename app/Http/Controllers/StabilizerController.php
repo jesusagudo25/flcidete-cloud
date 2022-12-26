@@ -34,9 +34,9 @@ class StabilizerController extends Controller
         //Por mejorar presentacion del stock
 
         /* Quantitity StabilizerUpdates */
-        if ($request->has('quantity') && $request->quantity > 1) {
+        if ($request->has('quantity')) {
             $quantity = $request->quantity;
-            for ($i = 0; $i < $quantity - 1; $i++) {
+            for ($i = 0; $i < $quantity; $i++) {
                 $stabilizer->stabilizerUpdates()->create([
                     'stabilizer_id' => $stabilizer->id,
                     'estimated_value' => $request->estimated_value,
@@ -75,8 +75,40 @@ class StabilizerController extends Controller
      */
     public function update(Request $request, Stabilizer $stabilizer)
     {
-        Stabilizer::where('id', $stabilizer->id)
-            ->update($request->all());
+        $stabilizerUpdates = $stabilizer->stabilizerUpdates->where('active', 1)->count();
+        if($stabilizerUpdates > 0){
+            if($request->width != $stabilizer->width || $request->height != $stabilizer->height){
+                Stabilizer::where('id', $stabilizer->id)
+                ->update($request->all());
+    
+                $stabilizer->area = ($request->area ) * $stabilizerUpdates;
+                $stabilizer::where('id', $stabilizer->id)
+                ->update([
+                    'area' => $stabilizer->area
+                ]);
+            }
+            else{
+
+                Stabilizer::where('id', $stabilizer->id)
+                ->update([
+                    'name' => $request->name,
+                    'estimated_value' => $request->estimated_value,
+                    'purchase_price' => $request->purchase_price,
+                ]);
+            }
+        }
+        else{
+            Stabilizer::where('id', $stabilizer->id)
+            ->update([
+                'name' => $request->name,
+                'estimated_value' => $request->estimated_value,
+                'purchase_price' => $request->purchase_price,
+                'width' => $request->width,
+                'height' => $request->height,
+                'height_in_yd' => $request->height_in_yd,
+            ]);
+        }
+    
     }
 
     /**

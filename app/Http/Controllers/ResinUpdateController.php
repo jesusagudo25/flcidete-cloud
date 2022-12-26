@@ -80,9 +80,17 @@ class ResinUpdateController extends Controller
                 'current_weight' => $resin->current_weight + $resin->purchased_weight,
             ]);
         } else {
-            $resin->update([
-                'current_weight' => $resin->current_weight - $resin->purchased_weight,
-            ]);
+            $weight = $resin->current_weight - $resin->purchased_weight;
+            if($weight < 0){
+                $resin->update([
+                    'current_weight' => 0,
+                ]);
+            }
+            else{
+                $resin->update([
+                    'current_weight' => $weight,
+                ]);
+            }
         }
     }
 

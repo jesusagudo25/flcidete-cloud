@@ -13,8 +13,8 @@ class ComponentUpdate extends Model
         'component_id',
         'purchase_price',
         'estimated_value',
-        'quantity',
         'percentage',
+        'quantity',
         'sale_price'
     ];
 

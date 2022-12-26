@@ -48,15 +48,6 @@ class VinylUpdateController extends Controller
                 'area' => $vinyl->area + ($vinyl->width * $vinyl->height) * $request->quantity,
             ]);
         }
-
-/*         $vinyl->update([
-            'area' => $vinyl->area + ($vinyl->width * $vinyl->height),
-            'cost' => $request->cost,
-            'purchase_price' => $request->purchase_price,
-            'estimated_value' => $request->estimated_value,
-            'percentage' => $request->percentage,
-            'sale_price' => $request->sale_price,
-        ]); */
     }
 
     /**
@@ -91,9 +82,18 @@ class VinylUpdateController extends Controller
             ]);
         }
         else{
-            $vinyl->update([
-                'area' => $vinyl->area - ($vinyl->width * $vinyl->height),
-            ]);
+            $area = $vinyl->area - ($vinyl->width * $vinyl->height);
+            if($area < 0){
+                $vinyl->update([
+                    'area' => 0,
+                ]);
+            }
+            else{
+                $vinyl->update([
+                    'area' => $area,
+                ]);            
+            }
+
         }
     }
 

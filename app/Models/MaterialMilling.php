@@ -12,15 +12,10 @@ class MaterialMilling extends Model
     protected $fillable = [
         'name',
         'purchase_price',
-        'purchase_price_base',
         'estimated_value',
-        'estimated_value_base',
         'percentage',
-        'percentage_base',
         'sale_price',
-        'sale_price_base',
         'stock',
-        'quantity',
     ];
 
     public function sums(){

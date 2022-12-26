@@ -28,9 +28,9 @@ class ThreadController extends Controller
         $thread = Thread::create($request->all());
 
         /* Quantitity ThreadUpdates */
-        if($request->has('quantity') && $request->quantity > 1) {
+        if($request->has('quantity')) {
             $quantity = $request->quantity;
-            for ($i=0; $i < $quantity -1; $i++) { 
+            for ($i=0; $i < $quantity; $i++) { 
                 $thread->threadUpdates()->create([
                     'thread_id' => $thread->id,
                     'estimated_value' => $request->estimated_value,

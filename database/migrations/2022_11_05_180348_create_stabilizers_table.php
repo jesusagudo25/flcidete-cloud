@@ -17,20 +17,16 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             
-            $table->integer('width_base'); // Inches
             $table->integer('width'); // Inches
             
-            $table->integer('height_base'); //Inches
             $table->integer('height'); //Inches
             $table->integer('height_in_yd'); //yd
             
-            $table->integer('area_base'); // Inches
+            // Current area, estimated value and purchase price*************
             $table->integer('area'); // Inches
-            
-            $table->decimal('estimated_value_base', 8, 2);
+
             $table->decimal('estimated_value', 8, 2);
             
-            $table->decimal('purchase_price_base', 10, 2);
             $table->decimal('purchase_price', 10, 2);
             
             $table->boolean('active')->default(true);

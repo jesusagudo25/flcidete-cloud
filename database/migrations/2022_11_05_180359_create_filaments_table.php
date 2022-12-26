@@ -17,19 +17,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             
-            $table->decimal('estimated_value_base', 8, 2);
             $table->decimal('estimated_value', 8, 2);
             
-            $table->decimal('purchase_price_base', 10, 2);
             $table->decimal('purchase_price', 10, 2);
             
-            $table->integer('percentage_base'); // Percentage of profit
             $table->integer('percentage'); // Percentage of profit
             
-            $table->decimal('sale_price_base', 10, 2);
             $table->decimal('sale_price', 10, 2);
             
-            $table->integer('purchased_weight_base');
             $table->integer('purchased_weight');
             
             $table->integer('current_weight');

@@ -71,9 +71,16 @@ class StabilizerUpdateController extends Controller
                 'area' => $stabilizer->area + ($stabilizer->width * $stabilizer->height),
             ]);
         } else {
-            $stabilizer->update([
-                'area' => $stabilizer->area - ($stabilizer->width * $stabilizer->height),
-            ]);
+            $area = $stabilizer->area - ($stabilizer->width * $stabilizer->height);
+            if($area < 0) {
+                $area = 0;
+            }
+            else{
+                $stabilizer->update([
+                    'area' => $area,
+                ]);
+            }
+            
         }
     }
 

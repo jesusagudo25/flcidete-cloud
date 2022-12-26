@@ -12,22 +12,14 @@ class Vinyl extends Model
     protected $fillable = [
         'name',
         'cost',
-        'cost_base',
         'estimated_value',
-        'estimated_value_base',
         'purchase_price',
-        'purchase_price_base',
         'percentage',
-        'percentage_base',
         'sale_price',
-        'sale_price_base',
         'width',
-        'width_base',
         'height',
-        'height_base',
         'height_in_feet',
         'area',
-        'area_base',
     ];
 
     public function sums(){

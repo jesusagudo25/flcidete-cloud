@@ -28,16 +28,14 @@ class SoftwareController extends Controller
         $software = Software::create($request->all());
 
         /* Quantitity SoftwareUpdates */
-        if ($request->has('quantity') && $request->quantity > 1) {
+        if ($request->has('quantity')) {
             $quantity = $request->quantity;
-            for ($i = 0; $i < $quantity - 1; $i++) {
+            for ($i = 0; $i < $quantity; $i++) {
                 $software->softwareUpdate()->create([
                     'softwares_id' => $software->id,
                     'purchase_price' => $request->purchase_price,
                     'estimated_value' => $request->estimated_value,
                     'sale_price' => $request->sale_price,
-                    'purchased_date' => $request->purchased_date,
-                    'expiration_date' => $request->expiration_date,
                 ]);
             }
         }

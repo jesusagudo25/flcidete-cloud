@@ -34,9 +34,9 @@ class MaterialLaserController extends Controller
         //Por mejorar presentacion del stock
 
         /* Quantitity MaterialLaserUpdates */
-        if ($request->has('quantity') && $request->quantity > 1) {
+        if ($request->has('quantity')) {
             $quantity = $request->quantity;
-            for ($i = 0; $i < $quantity - 1; $i++) {
+            for ($i = 0; $i < $quantity; $i++) {
                 $material->laserUpdates()->create([
                     'material_laser_id' => $material->id,
                     'cost' => $request->cost,
@@ -78,8 +78,46 @@ class MaterialLaserController extends Controller
      */
     public function update(Request $request, MaterialLaser $materialLaser)
     {
-        MaterialLaser::where('id', $materialLaser->id)
-            ->update($request->all());
+        $materialLaserUpdates =  $materialLaser->laserUpdates()->where('active', 1)->count();
+
+        if($materialLaserUpdates > 0){
+
+            if($request->width != $materialLaser->width || $request->height != $materialLaser->height){
+                MaterialLaser::where('id', $materialLaser->id)
+                ->update($request->all());
+
+                $materialLaser->area = ($request->area ) * $materialLaserUpdates;
+
+                $materialLaser::where('id', $materialLaser->id)
+                ->update([
+                    'area' => $materialLaser->area
+                ]);
+            }
+            else{
+                MaterialLaser::where('id', $materialLaser->id)
+                ->update([
+                    'name' => $request->name,
+                    'cost' => $request->cost,
+                    'purchase_price' => $request->purchase_price,
+                    'estimated_value' => $request->estimated_value,
+                    'percentage' => $request->percentage,
+                    'sale_price' => $request->sale_price,
+                ]);
+            }
+        }
+        else{
+            MaterialLaser::where('id', $materialLaser->id)
+            ->update([
+                'name' => $request->name,
+                'cost' => $request->cost,
+                'estimated_value' => $request->estimated_value,
+                'purchase_price' => $request->purchase_price,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+                'width' => $request->width,
+                'height' => $request->height,
+            ]);
+        }
     }
 
     /**

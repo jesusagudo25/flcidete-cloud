@@ -34,9 +34,9 @@ class VinylController extends Controller
         //Por mejorar presentacion del stock
 
         /* Quantitity VinylUpdates */
-        if ($request->has('quantity') && $request->quantity > 1) {
+        if ($request->has('quantity')) {
             $quantity = $request->quantity;
-            for ($i = 0; $i < $quantity - 1; $i++) {
+            for ($i = 0; $i < $quantity; $i++) {
                 $vinyl->vinylUpdates()->create([
                     'vinyl_id' => $vinyl->id,
                     'cost' => $request->cost,
@@ -78,24 +78,47 @@ class VinylController extends Controller
      */
     public function update(Request $request, Vinyl $vinyl)
     {
-        /* 
-        El usuario hace un edit del vinilo... Que se debe verificar:
+        $vinylUpdates = $vinyl->vinylUpdates()->where('active', 1)->count();
 
-            1. El ancho y largo del vinilo no se puede modificar si ya tiene un stock
-            2. El area del vinilo no se puede modificar si ya tiene un stock ?????
-
-            1. Si el ancho y largo del vinilo se modifican: Entonces se debe recalcular el area del vinilo
-            2. Si el costo del vinilo se modifica: No pasa nada
-            3. Si el precio de compra del vinilo se modifica: No pasa nada
-            4. Si el valor estimado del vinilo se modifica: No pasa nada
-            5. Si el porcentaje del vinilo se modifica: No pasa nada
-            6. Si la descripcion del vinilo se modifica: No pasa nada
-
+        if($vinylUpdates > 0){
+            if($request->width != $vinyl->width || $request->height != $vinyl->height){
+                Vinyl::where('id', $vinyl->id)
+                ->update($request->all());
+    
+                $vinyl->area = ($request->area ) * $vinylUpdates;
+    
+                $vinyl::where('id', $vinyl->id)
+                ->update([
+                    'area' => $vinyl->area
+                ]);
+            }
+            else{
+                Vinyl::where('id', $vinyl->id)
+                ->update([
+                    'name' => $request->name,
+                    'cost' => $request->cost,
+                    'purchase_price' => $request->purchase_price,
+                    'estimated_value' => $request->estimated_value,
+                    'percentage' => $request->percentage,
+                    'sale_price' => $request->sale_price,
+                ]);
+            }
+        }
+        else{
+            Vinyl::where('id', $vinyl->id)
+            ->update([
+                'name' => $request->name,
+                'cost' => $request->cost,
+                'purchase_price' => $request->purchase_price,
+                'estimated_value' => $request->estimated_value,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+                'width' => $request->width,
+                'height' => $request->height,
+                'height_in_feet' => $request->height_in_feet,
+            ]);
+        }
         
-        */
-
-        Vinyl::where('id', $vinyl->id)
-            ->update($request->all());
     }
 
     /**

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\Quotation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use PDF;
 
 class QuotationController extends Controller
 {
@@ -25,7 +28,27 @@ class QuotationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $customer_id = $request->has('customer_id') ? $request->customer_id : null;
+
+        if (empty($customer_id)) {
+            $customer = Customer::create($request->all());
+            $customer_id = $customer->id;
+        } else {
+            $customer_id = $customer_id;
+        }
+
+        $quotation = Quotation::create([
+            'customer_id' => $customer_id,
+            'user_id' => $request->id,
+            'total' => $request->total,
+            'description' => empty($request->description) ? null : $request->description,
+        ]);
+
+        return response()->json([
+            'message' => 'Cotización creada correctamente',
+            'success' => true,
+            'quotation' => $quotation,
+        ], 201);
     }
 
     /**
@@ -60,5 +83,40 @@ class QuotationController extends Controller
     public function destroy(Quotation $quotation)
     {
         //
+    }
+
+    public function pdf(Quotation $quotation)
+    {
+        $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
+        $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
+        $townships = Http::get('http://127.0.0.1:8001/api/townships')->collect();
+
+        $province_id = null;
+        $district_id = null;
+        $township_id = null;
+
+        $customer = $quotation->customer;
+
+        $provinces->each(function($province, $key) use ($customer, &$province_id){
+            if($customer['province_id'] == $province['id']){
+                $province_id = $province['name'];
+            }
+        });
+
+        $districts->each(function($district, $key) use ($customer, &$district_id){
+            if($customer['district_id'] == $district['id']){
+                $district_id = $district['name'];
+            }
+        });
+
+        $townships->each(function($township, $key) use ($customer, &$township_id){
+            if($customer['township_id'] == $township['id']){
+                $township_id = $township['name'];
+            }
+        });
+
+        $pdf = PDF::loadView('quotation', with(['quotation' => $quotation, 'user' => $quotation->user, 'customer' => $customer, 'province_id' => $province_id, 'district_id' => $district_id, 'township_id' => $township_id]));
+
+        return $pdf->stream();
     }
 }

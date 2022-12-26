@@ -41,9 +41,17 @@ class MillingUpdateController extends Controller
 
         }
         else{
-            $milling->update([
-                'stock' => $milling->stock + $request->quantity,
-            ]);
+            $stock = $milling->stock + $request->quantity;
+            if($stock < 0){
+                $milling->update([
+                    'stock' => 0,
+                ]);
+            }
+            else{
+                $milling->update([
+                    'stock' => $stock,
+                ]);
+            }
         }
     }
 

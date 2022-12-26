@@ -25,7 +25,17 @@ class MaterialMillingController extends Controller
      */
     public function store(Request $request)
     {
-        MaterialMilling::create($request->all());
+        $materialMilling = MaterialMilling::create($request->all());
+
+        $materialMilling->millingUpdates()->create([
+            'material_milling_id' => $materialMilling->id,
+            'estimated_value' => $request->estimated_value,
+            'purchase_price' => $request->purchase_price,
+            'percentage' => $request->percentage,
+            'quantity' => $request->quantity,
+            'sale_price' => $request->sale_price,
+        ]);
+        
     }
 
     /**

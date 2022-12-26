@@ -79,9 +79,17 @@ class ComponentUpdateController extends Controller
                 'stock' => $component->stock + $componentUpdate->quantity,
             ]);
         } else {
-            $component->update([
-                'stock' => $component->stock - $componentUpdate->quantity,
-            ]);
+            $stock = $component->stock - $componentUpdate->quantity;
+            if ($stock < 0) {
+                $component->update([
+                    'stock' => 0,
+                ]);
+            }
+            else{
+                $component->update([
+                    'stock' => $stock,
+                ]);
+            }
         }
     }
 

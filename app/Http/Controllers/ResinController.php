@@ -34,9 +34,9 @@ class ResinController extends Controller
         //Por mejorar presentacion del stock
         
         /* Quantitity ResinUpdates */
-        if ($request->has('quantity') && $request->quantity > 1) {
+        if ($request->has('quantity')) {
             $quantity = $request->quantity;
-            for ($i = 0; $i < $quantity - 1; $i++) {
+            for ($i = 0; $i < $quantity; $i++) {
                 $resin->resinUpdates()->create([
                     'resin_id' => $resin->id,
                     'purchase_price' => $request->purchase_price,
@@ -86,8 +86,35 @@ class ResinController extends Controller
      */
     public function update(Request $request, Resin $resin)
     {
-        Resin::where('id', $resin->id)
-            ->update($request->all());
+        $resinUpdates = $resin->resinUpdates()->where('active',1)->count();
+        if($resinUpdates > 0){
+            if($request->purchased_weight != $resin->purchased_weight){
+                Resin::where('id', $resin->id)->update($request->all());
+
+                $resin->current_weight = $request->purchase_weight * $resinUpdates;
+
+                $resin::where('id', $resin->id)->update($resin->current_weight);
+            }
+            else{
+                Resin::where('id', $resin->id)->update([
+                    'name' => $request->name,
+                    'estimated_value' => $request->estimated_value,
+                    'purchase_price' => $request->purchase_price,
+                    'percentage' => $request->percentage,
+                    'sale_price' => $request->sale_price,
+                ]);
+            }
+        }
+        else{
+            Resin::where('id', $resin->id)->update([
+                'name' => $request->name,
+                'estimated_value' => $request->estimated_value,
+                'purchase_price' => $request->purchase_price,
+                'percentage' => $request->percentage,
+                'sale_price' => $request->sale_price,
+                'purchased_weight' => $request->purchased_weight,
+            ]);
+        }
     }
 
     /**

@@ -80,9 +80,17 @@ class FilamentUpdateController extends Controller
                 'current_weight' => $filament->current_weight + $filament->purchased_weight,
             ]);
         } else {
-            $filament->update([
-                'current_weight' => $filament->current_weight - $filament->purchased_weight,
-            ]);
+            $weight = $filament->current_weight - $filament->purchased_weight;
+            if($weight < 0){
+                $filament->update([
+                    'current_weight' => 0,
+                ]);
+            }
+            else{
+                $filament->update([
+                    'current_weight' => $weight,
+                ]);
+            }
         }
     }
 

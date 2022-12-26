@@ -19,13 +19,8 @@ class SoftwareFactory extends Factory
         return [
             'name' => $this->faker->name,
             'purchase_price' => $this->faker->randomFloat(2, 1, 20),
-            'purchase_price_base' => $this->faker->randomFloat(2, 1, 20),
             'estimated_value' => $this->faker->randomFloat(2, 1, 20),
-            'estimated_value_base' => $this->faker->randomFloat(2, 1, 20),
             'sale_price' => $this->faker->randomFloat(2, 25, 30),
-            'sale_price_base' => $this->faker->randomFloat(2, 25, 30),
-            'purchased_date' => $this->faker->dateTimeBetween('-1 years', 'now'),
-            'purchased_date_base' => $this->faker->dateTimeBetween('-1 years', 'now'),
         ];
     }
 }

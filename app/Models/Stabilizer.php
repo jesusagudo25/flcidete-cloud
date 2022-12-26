@@ -12,15 +12,11 @@ class Stabilizer extends Model
     protected $fillable = [
         'name',
         'width',
-        'width_base',
         'height',
-        'height_base',
         'height_in_yd',
-        'area_base',
+        'area',
         'purchase_price',
-        'purchase_price_base',
         'estimated_value',
-        'estimated_value_base',
     ];
 
     public function suEmbroideries(){

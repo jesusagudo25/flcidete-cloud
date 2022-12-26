@@ -25,7 +25,16 @@ class ComponentController extends Controller
      */
     public function store(Request $request)
     {
-        Component::create($request->all());
+        $component = Component::create($request->all());
+
+        $component->componentUpdates()->create([
+            'component_id' => $component->id,
+            'estimated_value' => $request->estimated_value,
+            'purchase_price' => $request->purchase_price,
+            'percentage' => $request->percentage,
+            'quantity' => $request->quantity,
+            'sale_price' => $request->sale_price,
+        ]);
     }
 
     /**
@@ -49,7 +58,7 @@ class ComponentController extends Controller
     public function update(Request $request, Component $component)
     {
         Component::where('id', $component->id)
-        ->update($request->all());
+            ->update($request->all());
     }
 
     /**
