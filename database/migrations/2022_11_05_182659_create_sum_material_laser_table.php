@@ -21,8 +21,8 @@ return new class extends Migration
             $table->foreignId('material_laser_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->integer('width'); //Feet
-            $table->integer('height'); //Feet
+            $table->decimal('width', 8, 2); //Feet
+            $table->decimal('height', 8, 2); //Feet
             $table->integer('quantity');
             $table->decimal('price', 8, 2);
         });

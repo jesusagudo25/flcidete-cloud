@@ -22,8 +22,8 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
 
-            $table->integer('width'); //Inches
-            $table->integer('height'); //Inches
+            $table->decimal('width', 8, 2); //Inches
+            $table->decimal('height', 8, 2); //Inches
             $table->decimal('price', 8, 2);
         });
     }

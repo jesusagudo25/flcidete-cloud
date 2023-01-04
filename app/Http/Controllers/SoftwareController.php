@@ -56,7 +56,7 @@ class SoftwareController extends Controller
     {
         $softwares = Software::where([
             ['name', 'like', '%' . $search . '%'],
-            ['expiration_date' , '>', date('Y-m-d')],
+            ['active', '=', '1']
         ])->get();
         return $softwares;
     }

@@ -70,17 +70,20 @@ class AuthController extends Controller
             'password' => 'required|string|min:8'
         ]);
 
-        $user = User::create([
+        $userRegister = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'role_id' => $request->role_id,
             'password' => Hash::make($request->password)
         ]);
 
-        $users = User::where('role_id', 1)->get();
+        $users = User::where([
+            ['role_id', '=', 1],
+            ['id', '!=', $userRegister->id]
+        ])->get();
         
         foreach($users as $user){
-            Mail::to($user->email)->send(new UserRegistrationNotification($user));
+            Mail::to($user->email)->send(new UserRegistrationNotification($userRegister));
         }
 
         $response = [

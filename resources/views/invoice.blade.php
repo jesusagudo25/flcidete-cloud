@@ -188,10 +188,10 @@
                 <th class="w-50">Descripcion</th>
                 <th class="w-15">Total</th>
             </tr>
-            <tr align="center">
-                <td>1</td>
+            <tr>
+                <td align="center">1</td>
                 <td>{{ $invoice->description}}</td>
-                <td>${{ $invoice->total }}</td>
+                <td align="center">${{ $invoice->total }}</td>
             </tr>
             <tr>
                 <td colspan="3">

@@ -7,6 +7,7 @@ use App\Models\Area;
 use App\Models\Booking;
 use App\Models\Component;
 use App\Models\ComponentUpdate;
+use App\Models\Event;
 use App\Models\Filament;
 use App\Models\FilamentUpdate;
 use App\Models\Invoice;
@@ -20,6 +21,7 @@ use App\Models\Report;
 use App\Models\Resin;
 use App\Models\ResinUpdate;
 use App\Models\Software;
+use App\Models\SoftwareUpdate;
 use App\Models\Stabilizer;
 use App\Models\StabilizerUpdate;
 use App\Models\TechExpense;
@@ -31,6 +33,7 @@ use App\Models\VinylUpdate;
 use App\Models\Visit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use PDF;
 
@@ -125,29 +128,35 @@ class ReportController extends Controller
 
         $report->end_date = Carbon::parse($report->end_date)->addHours(23)->addMinutes(59)->toDateTimeString();
 
-        $totalVisits = Visit::whereBetween('created_at', [$report->start_date, $report->end_date])->count();
+        $totalVisits = Visit::whereBetween('created_at', [$report->start_date, $report->end_date])
+            ->where('active', 1)
+            ->count(); 
+
         $totalTime = Visit::whereBetween('visits.created_at', [$report->start_date, $report->end_date])
+            ->where('visits.active', 1)
             ->join('area_visit', 'visits.id', '=', 'area_visit.visit_id')
             ->selectRaw('sum(hour(TIMEDIFF(area_visit.end_time, area_visit.start_time))) as total')
             ->get();
 
         /* Pivot table */
         $customersTop = Visit::whereBetween('visits.created_at', [$report->start_date, $report->end_date])
+            ->where('visits.active', 1)
             ->join('customer_visit', 'visits.id', '=', 'customer_visit.visit_id')
             ->join('customers', 'customer_visit.customer_id', '=', 'customers.id')
             ->selectRaw('customers.name, count(*) as total')
             ->groupBy('customer_visit.customer_id')
             ->orderBy('total', 'desc')
-            ->limit(10)
+            ->limit(3)
             ->get();
 
         $districtsTop = Visit::whereBetween('visits.created_at', [$report->start_date, $report->end_date])
+            ->where('visits.active', 1)
             ->join('customer_visit', 'visits.id', '=', 'customer_visit.visit_id')
             ->join('customers', 'customer_visit.customer_id', '=', 'customers.id')
             ->selectRaw('customers.district_id, count(*) as total')
             ->groupBy('customers.district_id')
             ->orderBy('total', 'desc')
-            ->limit(10)
+            ->limit(3)
             ->get();
 
         $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
@@ -159,6 +168,7 @@ class ReportController extends Controller
 
         /* Multi table */
         $timeDifferentAreas = Visit::whereBetween('visits.created_at', [$report->start_date, $report->end_date])
+            ->where('visits.active', 1)
             ->join('area_visit', 'visits.id', '=', 'area_visit.visit_id')
             ->join('areas', 'area_visit.area_id', '=', 'areas.id')
             ->selectRaw('areas.id, areas.name, sum(hour(TIMEDIFF(area_visit.end_time, area_visit.start_time))) as total')
@@ -172,6 +182,7 @@ class ReportController extends Controller
         /* Multi table */
 
         $timeDifferentReasonVisit = Visit::whereBetween('visits.created_at', [$report->start_date, $report->end_date])
+            ->where('visits.active', 1)
             ->join('area_visit', 'visits.id', '=', 'area_visit.visit_id')
             ->join('reason_visits', 'visits.reason_visit_id', '=', 'reason_visits.id')
             ->selectRaw('reason_visits.id, reason_visits.name, sum(hour(TIMEDIFF(area_visit.end_time, area_visit.start_time))) as total')
@@ -183,6 +194,7 @@ class ReportController extends Controller
         $timeDifferentReasonVisit = $timeDifferentReasonVisit->merge($reasonVisitsNotShow);
 
         $ageRangeTotal = Visit::whereBetween('visits.created_at', [$report->start_date, $report->end_date])
+            ->where('visits.active', 1)
             ->join('customer_visit', 'visits.id', '=', 'customer_visit.visit_id')
             ->join('customers', 'customer_visit.customer_id', '=', 'customers.id')
             ->join('age_ranges', 'customers.age_range_id', '=', 'age_ranges.id')
@@ -196,6 +208,7 @@ class ReportController extends Controller
         $ageRangeTotal = $ageRangeTotal->merge($ageRangesNotShow);
 
         $typeSexesTotal = Visit::whereBetween('visits.created_at', [$report->start_date, $report->end_date])
+            ->where('visits.active', 1)
             ->join('customer_visit', 'visits.id', '=', 'customer_visit.visit_id')
             ->join('customers', 'customer_visit.customer_id', '=', 'customers.id')
             ->join('type_sexes', 'customers.type_sex_id', '=', 'type_sexes.id')
@@ -208,8 +221,9 @@ class ReportController extends Controller
 
         $typeSexesTotal = $typeSexesTotal->merge($typeSexesNotShow);
 
-        $observations = Observation::with('user')->whereBetween('created_at', [$report->start_date, $report->end_date])->get();
-
+        $observations = Observation::with('user')->whereBetween('created_at', [$report->start_date, $report->end_date])
+            ->where('active', 1)
+            ->get();
 
         /* Bookings */
 
@@ -232,32 +246,43 @@ class ReportController extends Controller
         /* Informacion basica */
 
         $totalSalesEvents = Invoice::whereBetween('created_at', [$report->start_date, $report->end_date])
+            ->where('status','F')
             ->join('event_invoice', 'invoices.id', '=', 'event_invoice.invoice_id')
             ->count();
 
         $totalSalesSUM = Invoice::whereBetween('created_at', [$report->start_date, $report->end_date])
+            ->where('status','F')
             ->join('sums', 'invoices.id', '=', 'sums.invoice_id')
             ->count();
 
         $totalSalesSUS = Invoice::whereBetween('created_at', [$report->start_date, $report->end_date])
+            ->where('status','F')
             ->join('suss', 'invoices.id', '=', 'suss.invoice_id')
             ->count();
 
         $totalSalesEmbroidery = Invoice::whereBetween('created_at', [$report->start_date, $report->end_date])
+            ->where('status','F')
             ->join('su_embroideries', 'invoices.id', '=', 'su_embroideries.invoice_id')
             ->count();
 
         $useMachines = $totalSalesSUM + $totalSalesSUS + $totalSalesEmbroidery;
 
         $totalSalesMaker = Invoice::whereBetween('created_at', [$report->start_date, $report->end_date])
-            ->where('type_sale', 'M')->count();
+            ->where([
+                ['status', 'F'],
+                ['type_sale', 'M']
+            ])->count();
 
         $totalSalesServices = Invoice::whereBetween('created_at', [$report->start_date, $report->end_date])
-            ->where('type_sale', 'S')->count();
+            ->where([
+                ['status', 'F'],
+                ['type_sale', 'S']
+            ])->count();
 
-       /* Ingresos y gastos en eventos */
+        /* Ingresos y gastos en eventos */
 
         $eventsExpensesIncome = Invoice::whereBetween('invoices.created_at', [$report->start_date, $report->end_date])
+            ->where('invoices.status', 'F')
             ->join('event_invoice', 'invoices.id', '=', 'event_invoice.invoice_id')
             ->join('events', 'event_invoice.event_id', '=', 'events.id')
             ->selectRaw('events.name, events.price, events.expenses AS egresos, event_invoice.event_id, sum(events.price) as ingresos')
@@ -268,6 +293,7 @@ class ReportController extends Controller
         /* Ingresos en areas */
 
         $SUMIncome = Invoice::whereBetween('invoices.created_at', [$report->start_date, $report->end_date])
+            ->where('invoices.status', 'F')
             ->join('sums', 'invoices.id', '=', 'sums.invoice_id')
             ->join('areas', 'sums.area_id', '=', 'areas.id')
             ->selectRaw('areas.id, areas.name, sum(sums.base_cost) as ingresos')
@@ -276,6 +302,7 @@ class ReportController extends Controller
             ->get();
 
         $SUSIncome = Invoice::whereBetween('invoices.created_at', [$report->start_date, $report->end_date])
+            ->where('invoices.status', 'F')
             ->join('suss', 'invoices.id', '=', 'suss.invoice_id')
             ->join('areas', 'suss.area_id', '=', 'areas.id')
             ->selectRaw('areas.id, areas.name, sum(suss.base_cost) as ingresos')
@@ -284,6 +311,7 @@ class ReportController extends Controller
             ->get();
 
         $SUEIncome = Invoice::whereBetween('invoices.created_at', [$report->start_date, $report->end_date])
+            ->where('invoices.status', 'F')
             ->join('su_embroideries', 'invoices.id', '=', 'su_embroideries.invoice_id')
             ->join('areas', 'su_embroideries.area_id', '=', 'areas.id')
             ->selectRaw('areas.id, areas.name, sum(su_embroideries.base_cost) as ingresos')
@@ -299,122 +327,161 @@ class ReportController extends Controller
 
         $SUMIncome = $SUMIncome->merge($SUMIncomeNotShow);
 
+
+        /* Egresos en areas ----------------------- Donaciones*/
+
         /* Tech expenses - name and expenses*/
 
         $techExpenses = TechExpense::with('area')->whereBetween('tech_expenses.created_at', [$report->start_date, $report->end_date])
+            ->where('tech_expenses.active', 1)
             ->get();
-        /* Egresos en areas */
 
         /* Bordadora */
 
-        $threadExpenses = Thread::whereBetween('threads.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(threads.price_purchase) as egresos')
-            ->orderBy('egresos', 'asc')
-            ->get();
-
         $threadUpdateExpenses = ThreadUpdate::whereBetween('thread_updates.created_at', [$report->start_date, $report->end_date])
+            ->where('thread_updates.active', 1)
             ->selectRaw('sum(thread_updates.purchase_price) as egresos')
             ->orderBy('egresos', 'asc')
             ->get();
 
-
-        $stabilizerExpenses = Stabilizer::whereBetween('stabilizers.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(stabilizers.purchase_price) as egresos')
-            ->orderBy('egresos', 'asc')
-            ->get();
+        $threadUpdateDonation = ThreadUpdate::whereBetween('thread_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['thread_updates.purchase_price', 0],
+            ['thread_updates.active', 1]
+        ])
+        ->selectRaw('sum(thread_updates.estimated_value) as donation')
+        ->orderBy('donation', 'asc')
+        ->get();
 
         $stabilizerUpdateExpenses = StabilizerUpdate::whereBetween('stabilizer_updates.created_at', [$report->start_date, $report->end_date])
+            ->where('stabilizer_updates.active', 1)
             ->selectRaw('sum(stabilizer_updates.purchase_price) as egresos')
             ->orderBy('egresos', 'asc')
             ->get();
 
-        $SUMIncome = $SUMIncome->map(function ($item) use ($threadExpenses, $stabilizerExpenses, $threadUpdateExpenses, $stabilizerUpdateExpenses) {
+        $stabilizerUpdateDonation = StabilizerUpdate::whereBetween('stabilizer_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['stabilizer_updates.purchase_price', 0],
+            ['stabilizer_updates.active', 1]
+        ])
+        ->selectRaw('sum(stabilizer_updates.estimated_value) as donation') 
+        ->orderBy('donation', 'asc')
+        ->get();
+        
+
+        $SUMIncome = $SUMIncome->map(function ($item) use ($threadUpdateExpenses, $stabilizerUpdateExpenses) {
             if ($item->id == 8) {
-                $item->egresos = $threadExpenses[0]->egresos + $threadUpdateExpenses[0]->egresos + $stabilizerExpenses[0]->egresos + $stabilizerUpdateExpenses[0]->egresos;
+                $item->egresos = $threadUpdateExpenses[0]->egresos + $stabilizerUpdateExpenses[0]->egresos;
             }
             return $item;
         });
 
         /* Cortadora de vinilo */
 
-        $vinylExpenses = Vinyl::whereBetween('vinyls.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(vinyls.cost) as egresos')
-            ->orderBy('egresos', 'asc')
-            ->get();
-        
         $vinylUpdateExpenses = VinylUpdate::whereBetween('vinyl_updates.created_at', [$report->start_date, $report->end_date])
+            ->where('vinyl_updates.active', 1)
             ->selectRaw('sum(vinyl_updates.cost) as egresos')
             ->orderBy('egresos', 'asc')
             ->get();
 
-        $SUMIncome = $SUMIncome->map(function ($item) use ($vinylExpenses, $vinylUpdateExpenses) {
+        $vinylUpdateDonation = VinylUpdate::whereBetween('vinyl_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['vinyl_updates.cost', 0],
+            ['vinyl_updates.active', 1]
+        ])
+        ->selectRaw('sum(vinyl_updates.estimated_value) as donation')
+        ->orderBy('donation', 'asc')
+        ->get();
+
+        $SUMIncome = $SUMIncome->map(function ($item) use ($vinylUpdateExpenses) {
             if ($item->id == 4) {
-                $item->egresos = $vinylExpenses[0]->egresos + $vinylUpdateExpenses[0]->egresos;
+                $item->egresos = $vinylUpdateExpenses[0]->egresos;
             }
             return $item;
         });
 
         /* Electronica */
 
-        $componentsExpenses = Component::whereBetween('components.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(components.purchase_price) as egresos')
-            ->orderBy('egresos', 'asc')
-            ->get();
-
         $componentsUpdateExpenses = ComponentUpdate::whereBetween('component_updates.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(component_updates.purchase_price) as egresos')
+            ->where('component_updates.active', 1)
+            ->selectRaw('sum(component_updates.purchase_price) as egresos, component_updates.quantity')
             ->orderBy('egresos', 'asc')
+            ->groupBy('component_updates.component_id', 'component_updates.quantity')
             ->get();
 
-        $SUMIncome = $SUMIncome->map(function ($item) use ($componentsExpenses, $componentsUpdateExpenses) {
-            if ($item->id ==1) {
-                $item->egresos = $componentsExpenses[0]->egresos + $componentsUpdateExpenses[0]->egresos;
+        $componentsUpdateDonation = ComponentUpdate::whereBetween('component_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['component_updates.purchase_price', 0],
+            ['component_updates.active', 1]
+        ])
+        ->selectRaw('sum(component_updates.estimated_value) as donation, component_updates.quantity')
+        ->orderBy('donation', 'asc')
+        ->groupBy('component_updates.component_id', 'component_updates.quantity')
+        ->get();
+
+        /* Group bt component_id, */
+
+        $SUMIncome = $SUMIncome->map(function ($item) use ($componentsUpdateExpenses) {
+            if ($item->id == 1) {
+                foreach ($componentsUpdateExpenses as $component) {
+                    $item->egresos += $component->egresos * $component->quantity;
+                }
             }
             return $item;
         });
 
+
         /* filaments */
 
-        $filamentsExpenses = Filament::whereBetween('filaments.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(filaments.purchase_price) as egresos')
-            ->orderBy('egresos', 'asc')
-            ->get();
-
         $filamentsUpdateExpenses = FilamentUpdate::whereBetween('filament_updates.created_at', [$report->start_date, $report->end_date])
+            ->where('filament_updates.active', 1)
             ->selectRaw('sum(filament_updates.purchase_price) as egresos')
             ->orderBy('egresos', 'asc')
             ->get();
 
-        $SUMIncome = $SUMIncome->map(function ($item) use ($filamentsExpenses, $filamentsUpdateExpenses) {
+        $SUMIncome = $SUMIncome->map(function ($item) use ($filamentsUpdateExpenses) {
             if ($item->id == 5) {
-                $item->egresos = $filamentsExpenses[0]->egresos + $filamentsUpdateExpenses[0]->egresos;
+                $item->egresos = $filamentsUpdateExpenses[0]->egresos;
             }
             return $item;
         });
 
+        $filamentsUpdateDonation = FilamentUpdate::whereBetween('filament_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['filament_updates.purchase_price', 0],
+            ['filament_updates.active', 1]
+        ])
+        ->selectRaw('sum(filament_updates.estimated_value) as donation')
+        ->orderBy('donation', 'asc')
+        ->get();
+
         /* resins */
-
-        $resinsExpenses = Resin::whereBetween('resins.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(resins.purchase_price) as egresos')
-            ->orderBy('egresos', 'asc')
-            ->get();
-
         $resinsUpdateExpenses = ResinUpdate::whereBetween('resin_updates.created_at', [$report->start_date, $report->end_date])
+            ->where('resin_updates.active', 1)
             ->selectRaw('sum(resin_updates.purchase_price) as egresos')
             ->orderBy('egresos', 'asc')
             ->get();
 
-        $SUMIncome = $SUMIncome->map(function ($item) use ($resinsExpenses, $resinsUpdateExpenses) {
+        $SUMIncome = $SUMIncome->map(function ($item) use ($resinsUpdateExpenses) {
             if ($item->id == 6) {
-                $item->egresos = $resinsExpenses[0]->egresos + $resinsUpdateExpenses[0]->egresos;
+                $item->egresos = $resinsUpdateExpenses[0]->egresos;
             }
             return $item;
         });
 
-        /* Softwares */
+        $resinsUpdateDonation = ResinUpdate::whereBetween('resin_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['resin_updates.purchase_price', 0],
+            ['resin_updates.active', 1]
+        ])
+        ->selectRaw('sum(resin_updates.estimated_value) as donation')
+        ->orderBy('donation', 'asc')
+        ->get();
 
-        $softwaresExpenses = Software::whereBetween('softwares.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(softwares.purchase_price) as egresos')
+        /* Softwares */
+        $softwaresExpenses = SoftwareUpdate::whereBetween('software_updates.created_at', [$report->start_date, $report->end_date])
+            ->where('software_updates.active', 1)
+            ->selectRaw('sum(software_updates.purchase_price) as egresos')
             ->orderBy('egresos', 'asc')
             ->get();
 
@@ -425,49 +492,85 @@ class ReportController extends Controller
             return $item;
         });
 
+        $softwaresDonation = SoftwareUpdate::whereBetween('software_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['software_updates.purchase_price', 0],
+            ['software_updates.active', 1]
+        ])
+        ->selectRaw('sum(software_updates.estimated_value) as donation')
+        ->orderBy('donation', 'asc')
+        ->get();
+
         /* Materials Laser */
 
-        $materialsLaserExpenses = MaterialLaser::whereBetween('material_lasers.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(material_lasers.cost) as egresos')
-            ->orderBy('egresos', 'asc')
-            ->get();
-
         $materialsLaserUpdateExpenses = LaserUpdate::whereBetween('laser_updates.created_at', [$report->start_date, $report->end_date])
+            ->where('laser_updates.active', 1)
             ->selectRaw('sum(laser_updates.cost) as egresos')
             ->orderBy('egresos', 'asc')
             ->get();
 
-        $SUMIncome = $SUMIncome->map(function ($item) use ($materialsLaserExpenses, $materialsLaserUpdateExpenses) {
+        $SUMIncome = $SUMIncome->map(function ($item) use ($materialsLaserUpdateExpenses) {
             if ($item->id == 3) {
-                $item->egresos = $materialsLaserExpenses[0]->egresos + $materialsLaserUpdateExpenses[0]->egresos;
+                $item->egresos = $materialsLaserUpdateExpenses[0]->egresos;
             }
             return $item;
         });
+
+        $materialsLaserUpdateDonation = LaserUpdate::whereBetween('laser_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['laser_updates.cost', 0],
+            ['laser_updates.active', 1]
+        ])
+        ->selectRaw('sum(laser_updates.estimated_value) as donation')
+        ->orderBy('donation', 'asc')
+        ->get();
 
         /* Milling */
 
-        $millingExpenses = MaterialMilling::whereBetween('material_millings.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(material_millings.purchase_price) as egresos')
-            ->orderBy('egresos', 'asc')
-            ->get();
-
         $millingUpdateExpenses = MillingUpdate::whereBetween('milling_updates.created_at', [$report->start_date, $report->end_date])
-            ->selectRaw('sum(milling_updates.purchase_price) as egresos')
+            ->where('milling_updates.active', 1)
+            ->selectRaw('sum(milling_updates.purchase_price) as egresos, milling_updates.quantity')
             ->orderBy('egresos', 'asc')
+            ->groupBy('milling_updates.material_milling_id', 'milling_updates.quantity')
             ->get();
 
-        $SUMIncome = $SUMIncome->map(function ($item) use ($millingExpenses, $millingUpdateExpenses) {
+        /* Donation quantity */
+
+        $millingUpdateDonation = MillingUpdate::whereBetween('milling_updates.created_at', [$report->start_date, $report->end_date])
+        ->where([
+            ['milling_updates.purchase_price', 0],
+            ['milling_updates.active', 1]
+        ])
+        ->selectRaw('sum(milling_updates.estimated_value) as donation, milling_updates.quantity')
+        ->orderBy('donation', 'asc')
+        ->groupBy('milling_updates.material_milling_id', 'milling_updates.quantity')
+        ->get();
+
+        $SUMIncome = $SUMIncome->map(function ($item) use ($millingUpdateExpenses) {
             if ($item->id == 2) {
-                $item->egresos = $millingExpenses[0]->egresos + $millingUpdateExpenses[0]->egresos;
+                foreach ($millingUpdateExpenses as $milling) {
+                    $item->egresos += $milling->egresos * $milling->quantity;
+                }
             }
             return $item;
         });
+
+        /* Donation total */
+
+        $donationTotal = $materialsLaserUpdateDonation[0]->donation + $filamentsUpdateDonation[0]->donation + $resinsUpdateDonation[0]->donation + $softwaresDonation[0]->donation + $vinylUpdateDonation[0]->donation; + $threadUpdateDonation[0]->donation + $stabilizerUpdateDonation[0]->donation;
+
+        foreach ($millingUpdateDonation as $milling) {
+            $donationTotal += $milling->donation * $milling->quantity;
+        }
+
+        foreach ($componentsUpdateDonation as $component) {
+            $donationTotal += $component->donation * $component->quantity;
+        }
 
         $report->end_date = date('Y-m-d', strtotime($report->end_date));
 
         $type = match ($report->type) {
-            'c' => function () use ($report, $totalSalesEvents, $useMachines, $SUMIncome, $totalSalesMaker, $totalSalesServices, $eventsExpensesIncome, $techExpenses) {
-                /* Faltaria calcular totales */
+            'c' => function () use ($report, $totalSalesEvents, $useMachines, $SUMIncome, $totalSalesMaker, $totalSalesServices, $eventsExpensesIncome, $techExpenses, $donationTotal) {
                 $pdf = PDF::loadView('inventary', [
                     'report' => $report,
                     'totalSalesEvents' => $totalSalesEvents,
@@ -477,6 +580,7 @@ class ReportController extends Controller
                     'totalSalesServices' => $totalSalesServices,
                     'eventsExpensesIncome' => $eventsExpensesIncome->sortBy('name')->values()->all(),
                     'techExpenses' => $techExpenses->sortBy('name')->values()->all(),
+                    'donationTotal' => $donationTotal,
                 ]);
                 return $pdf->stream();
             },
@@ -497,7 +601,7 @@ class ReportController extends Controller
                 ]);
                 return $pdf->stream();
             },
-            default =>  function () use ($report, $totalVisits, $totalTime, $customersTop, $districtsTop, $timeDifferentAreas, $timeDifferentReasonVisit, $ageRangeTotal, $typeSexesTotal, $observations, $totalBookingsD, $totalBookingsC, $totalSalesEvents, $useMachines, $SUMIncome, $totalSalesMaker, $totalSalesServices, $eventsExpensesIncome, $techExpenses) {
+            default =>  function () use ($report, $totalVisits, $totalTime, $customersTop, $districtsTop, $timeDifferentAreas, $timeDifferentReasonVisit, $ageRangeTotal, $typeSexesTotal, $observations, $totalBookingsD, $totalBookingsC, $totalSalesEvents, $useMachines, $SUMIncome, $totalSalesMaker, $totalSalesServices, $eventsExpensesIncome, $techExpenses, $donationTotal) {
                 $pdf = PDF::loadView('general', [
                     'report' => $report,
                     'totalVisits' => $totalVisits,
@@ -518,6 +622,7 @@ class ReportController extends Controller
                     'totalSalesServices' => $totalSalesServices,
                     'eventsExpensesIncome' => $eventsExpensesIncome->sortBy('name')->values()->all(),
                     'techExpenses' => $techExpenses->sortBy('name')->values()->all(),
+                    'donationTotal' => $donationTotal,
                 ]);
                 return $pdf->stream();
             }

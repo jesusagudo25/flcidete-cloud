@@ -25,7 +25,7 @@
                     <tr>
                         <td style="text-align:center;">
                             <a href="https://fablabcidete.com" title="logo" target="_blank">
-                                <img width="80" src="{{ asset('/images/resumido.png') }}" title="logo"
+                                <img width="80" src="http://agudodev.me/assets/img/resumido.png" title="logo"
                                     alt="logo">
                             </a>
                         </td>

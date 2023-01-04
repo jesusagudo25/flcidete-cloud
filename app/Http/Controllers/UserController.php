@@ -54,6 +54,14 @@ class UserController extends Controller
         return User::findOrFail($user->id);
     }
 
+    public function validateEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'unique:users',
+        ]);
+        return response()->json($request->email, 200);
+    }
+
     /**
      * Update the specified resource in storage.
      *
@@ -71,6 +79,7 @@ class UserController extends Controller
                 Mail::to($user->email)->send(new UserActivationNotification($user));
             }
         }
+
         User::where('id', $user->id)->update($request->all());
     }
 

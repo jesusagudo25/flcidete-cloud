@@ -59,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function(){
 Route::controller(UserController::class)->group(function(){
     Route::get('/users', 'index');
     Route::get('/users/{user}', 'show');
+    Route::post('/users/check-email', 'validateEmail');
     Route::post('/users','store');
     Route::put('/users/{user}','update');
     Route::put('/users/{user}/password','updatePassword');
@@ -79,6 +80,7 @@ Route::controller(AreaController::class)->group(function(){
     Route::put('/areas/{area}', 'update');
     Route::delete('/areas/{area}', 'destroy');
     Route::get('/services', 'services');
+    Route::get('/graphs', 'graphs');
 });
 
 Route::controller(RoleController::class)->group(function(){
@@ -101,6 +103,8 @@ Route::controller(CustomerController::class)->group(function(){
     Route::get('/customers/{customer}', 'show');
     Route::get('/customers/{type}/{search}/', 'search');
     Route::get('/customers/v/{type}/{search}/', 'isExist');
+    Route::post('/customers/check-email', 'validateEmail');
+    Route::post('/customers/check-document', 'validateDocument');
     Route::post('/customers', 'store');
     Route::put('/customers/{customer}', 'update');
     Route::delete('/customers/{customer}', 'destroy');

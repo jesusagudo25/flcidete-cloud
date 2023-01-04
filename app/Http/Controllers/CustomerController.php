@@ -44,10 +44,27 @@ class CustomerController extends Controller
         $customer = Customer::where(
             [
                 ['document_type', '=', $type],
-                ['document_number', '=', $search]
+                ['document_number', '=', $search],
+                ['active', '=', '1']
             ]
         )->first();
         return $customer;
+    }
+
+    public function validateEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'unique:customers',
+        ]);
+        return response()->json($request->email, 200);
+    }
+
+    public function validateDocument(Request $request)
+    {
+        $request->validate([
+            'document_number' => 'unique:customers',
+        ]);
+        return response()->json($request->document_number, 200);
     }
 
     /**
@@ -63,7 +80,8 @@ class CustomerController extends Controller
         $customers = Customer::where(
             [
                 ['document_type', '=', $type],
-                ['document_number', 'like', '%' . $search . '%']
+                ['document_number', 'like', '%' . $search . '%'],
+                ['active', '=', '1']
             ]
         )->get();
         return $customers;

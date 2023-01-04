@@ -26,7 +26,7 @@ return new class extends Migration
                 ->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->string('email')->nullable();
+            $table->string('email')->nullable()->unique();
             $table->string('telephone')->nullable();
             $table->unsignedBigInteger('province_id');
             $table->unsignedBigInteger('district_id');

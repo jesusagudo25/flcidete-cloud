@@ -370,15 +370,15 @@
                 <th class="w-15">Egresos</th>
                 <th class="w-15">Diferencia</th>
             </tr>
-            @php($incomeSUM = 0)
-            @php($expensesSUM = 0)
-            @php($totalSUM = 0)
+            @php($incomeSUM = 0.00)
+            @php($expensesSUM = 0.00)
+            @php($totalSUM = 0.00)
             @foreach ($SUMIncome as $item)
                 <tr align="center">
                     <td>{{ $item['name'] }}</td>
-                    <td>$ {{ $item['ingresos'] ? $item['ingresos'] : 0 }}</td>
+                    <td>$ {{ $item['ingresos'] ? $item['ingresos'] : 0.00 }}</td>
                     @php($incomeSUM += $item['ingresos'])
-                    <td>$ {{ $item['egresos'] ? $item['egresos'] : 0 }}</td>
+                    <td>$ {{ $item['egresos'] ? $item['egresos'] : 0.00 }}</td>
                     @php($expensesSUM += $item['egresos'])
                     <td>$ {{ $item['ingresos'] - $item['egresos'] }}</td>
                     @php($totalSUM += $item['ingresos'] - $item['egresos'])
@@ -400,9 +400,9 @@
                 <th class="w-15">Egresos</th>
                 <th class="w-15">Diferencia</th>
             </tr>
-            @php($incomeEvents = 0)
-            @php($expensesEvents = 0)
-            @php($totalEvents = 0)
+            @php($incomeEvents = 0.00)
+            @php($expensesEvents = 0.00)
+            @php($totalEvents = 0.00)
             @if ($eventsExpensesIncome)
                 @foreach ($eventsExpensesIncome as $event)
                     <tr align="center">
@@ -455,7 +455,7 @@
                 </tr>
             @endif
             <tr>
-                <th class="w-50" colspan="2" >Total</th>
+                <th class="w-50"  style="text-align: right" colspan="2" >Total</th>
                 <th class="w-15">$ {{ $totalTechExpenses }}</th>
             </tr>
         </table>
@@ -480,7 +480,7 @@
         <table class="table w-100 mt-10">
             <tr>
                 <th class="w-15">Donaciones totales</th>
-                <th class="w-15">$ 0</th>
+                <th class="w-15">$ {{ $donationTotal }}</th>
             </tr>
         </table>
     </div>

@@ -34,40 +34,100 @@ class BookingController extends Controller
         $filename = $request->hasFile('file') ? $request->file('file') : null;
 
         $customers = [];
+        $temporalCustomers = [];
+        $excelErrors = [];
 
         if (!empty($filename)) {
             $collectionExcel = Excel::toCollection(new CustomersImport, $filename);
-            collect($collectionExcel[0])->each(function ($item, $key) use (&$customers) {
 
-                $customer = Customer::where('document_number', '=', $item['documento'])->first();
+            if ($collectionExcel->count() > 0) {
+                if (count($collectionExcel[0][0]) == 10) {
+                    if ($collectionExcel[0][0]->has('tipo_documento') & $collectionExcel[0][0]->has('documento') & $collectionExcel[0][0]->has('nombre') & $collectionExcel[0][0]->has('sexo') & $collectionExcel[0][0]->has('edad') & $collectionExcel[0][0]->has('telefono') & $collectionExcel[0][0]->has('correo') & $collectionExcel[0][0]->has('provincia') & $collectionExcel[0][0]->has('distrito') & $collectionExcel[0][0]->has('corregimiento')) {
+                        $message = 'El archivo tiene el formato correcto';
+                    } else {
+                        return response()->json([
+                            'message' => 'El archivo no tiene el formato correcto',
+                            'type' => 'format'
+                        ], 400);
+                    }
+                } else {
+                    return response()->json([
+                        'message' => 'El archivo no tiene el formato correcto',
+                        'type' => 'format'
+                    ], 400);
+                }
+            } else {
+                return response()->json([
+                    'message' => 'El archivo no tiene el formato correcto',
+                    'type' => 'format'
+                ], 400);
+            }
+
+            collect($collectionExcel[0])->each(function ($item, $key) use (&$customers, &$temporalCustomers, &$excelErrors) {
+
+                if ($item['tipo_documento'] == 'Cédula' || substr($item['tipo_documento'], 0, 1) == 'C') {
+                    $item['tipo_documento'] = 'C';
+                } elseif ($item['tipo_documento'] == 'Pasaporte' || substr($item['tipo_documento'], 0, 1) == 'P') {
+                    $item['tipo_documento'] = 'P';
+                } elseif ($item['tipo_documento'] == 'RUC' || substr($item['tipo_documento'], 0, 1) == 'R') {
+                    $item['tipo_documento'] = 'R';
+                } else {
+                    $excelErrors['tipo_documento'][] = $key + 1;
+                }
+
+
+                if (count($excelErrors) == 0) {
+
+                    $customer = Customer::where([
+                        ['document_number', '=', $item['documento']],
+                        ['document_type', '=', $item['tipo_documento']],
+                        ['active', '=', 1]
+                    ])->first();
+                } else {
+                    $customer = null;
+                }
+
                 if ($customer == null) {
                     $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
                     $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
                     $townships = Http::get('http://127.0.0.1:8001/api/townships')->collect();
 
-                    if ($item['tipo_documento'] == 'Cédula' || substr($item['tipo_documento'], 0, 1) == 'C') {
-                        $item['tipo_documento'] = 'C';
-                    } elseif ($item['tipo_documento'] == 'Pasaporte' || substr($item['tipo_documento'], 0, 1) == 'P') {
-                        $item['tipo_documento'] = 'P';
-                    } else {
-                        $item['tipo_documento'] = 'R';
-                    }
-
                     if ($item['sexo'] == 'Masculino' || substr($item['sexo'], 0, 1) == 'M') {
                         $type_sex_id = 1;
-                    } else {
+                    } else if ($item['sexo'] == 'Femenino' || substr($item['sexo'], 0, 1) == 'F') {
                         $type_sex_id = 2;
+                    } else {
+                        $excelErrors['sexo'][] = $key + 1;
                     }
 
-                    $age_range_id = null;
-                    if ($item['edad'] <= 18) {
-                        $age_range_id = 1; //1 - 18
-                    } else if ($item['edad']  > 18 && $item['edad'] <= 26) {
-                        $age_range_id = 2; //19 - 26
-                    } else if ($item['edad']  > 26 && $item['edad']  <= 35) {
-                        $age_range_id = 3; //26 - 35
+                    if (is_numeric($item['edad'])) {
+                        $age_range_id = null;
+                        if ($item['edad'] <= 18) {
+                            $age_range_id = 1; //1 - 18
+                        } else if ($item['edad']  > 18 && $item['edad'] <= 26) {
+                            $age_range_id = 2; //19 - 26
+                        } else if ($item['edad']  > 26 && $item['edad']  <= 35) {
+                            $age_range_id = 3; //26 - 35
+                        } else {
+                            $age_range_id = 4; //36 +
+                        }
                     } else {
-                        $age_range_id = 4; //36 +
+                        $excelErrors['edad'][] = $key + 1;
+                    }
+
+                    $email = null;
+                    if($item['correo'] != null){
+                        if (filter_var($item['correo'], FILTER_VALIDATE_EMAIL)) {
+                            $email = $item['correo'];
+                        }
+    
+                        $resul = Customer::where('email', $item['correo'])->first();
+    
+                        if ($resul) {
+                            $excelErrors['correo'][] = $key + 1;
+                        } else {
+                            $email = $item['correo'];
+                        }
                     }
 
                     $province_id = null;
@@ -91,24 +151,42 @@ class BookingController extends Controller
                         }
                     });
 
-                    $result = Customer::create([
-                        'document_type' => $item['tipo_documento'],
-                        'document_number' => $item['documento'],
-                        'name' => $item['nombre'],
-                        'type_sex_id' => $type_sex_id,
-                        'age_range_id' => $age_range_id,
-                        'telephone' => $item['telefono'],
-                        'email' => $item['correo'],
-                        'province_id' => $province_id,
-                        'district_id' => $district_id,
-                        'township_id' => $township_id,
-                    ]);
+                    if ($province_id == null || $district_id == null || $township_id == null) {
+                        $excelErrors['direccion'][] = $key + 1;
+                    }
 
-                    $customers[] = $result->id;
+                    if (count($excelErrors) === 0) {
+
+                        $temporalCustomers[] = [
+                            'document_type' => $item['tipo_documento'],
+                            'document_number' => $item['documento'],
+                            'name' => $item['nombre'],
+                            'type_sex_id' => $type_sex_id,
+                            'age_range_id' => $age_range_id,
+                            'telephone' => $item['telefono'],
+                            'email' => $email,
+                            'province_id' => $province_id,
+                            'district_id' => $district_id,
+                            'township_id' => $township_id,
+                        ];
+                    }
                 } else {
                     $customers[] = $customer->id;
                 }
             });
+            
+            if (count($excelErrors) > 0) {
+                return response()->json([
+                    'errors' => $excelErrors
+                ], 422);
+            } else {
+                if (count($temporalCustomers) > 0) {
+                    foreach ($temporalCustomers as $temporalCustomer) {
+                        $customer = Customer::create($temporalCustomer);
+                        $customers[] = $customer->id;
+                    }
+                }
+            }
         }
 
         $booking = Booking::create([
@@ -129,7 +207,8 @@ class BookingController extends Controller
         }
     }
 
-    public function storePut(Request $request){
+    public function storePut(Request $request)
+    {
 
         $filename = $request->hasFile('file') ? $request->file('file') : null;
         $customers = [];
@@ -209,7 +288,7 @@ class BookingController extends Controller
                 }
             });
         }
-        
+
         $booking = Booking::where('id', $request->id)->update([
             'reason_visit_id' => $request->reason_visit_id,
             'type' => $request->type,
@@ -230,7 +309,6 @@ class BookingController extends Controller
             $booking->areas()->detach();
             $booking->areas()->attach($request->areas);
         }
-
     }
 
     /**
@@ -241,7 +319,6 @@ class BookingController extends Controller
      */
     public function show(Booking $booking)
     {
-        
     }
 
     public function pdf(Booking $booking)

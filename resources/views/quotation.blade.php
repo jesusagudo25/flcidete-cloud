@@ -114,11 +114,11 @@
 
 <body>
     <div class="head-title">
-        <h1 class="text-center m-0 p-0">Factura</h1>
+        <h1 class="text-center m-0 p-0">Cotización</h1>
     </div>
     <div class="add-detail mt-10">
         <div class="w-50 float-left mt-10">
-            <p class="m-0 pt-5 text-bold w-100">Factura - <span class="gray-color">#{{ $quotation->id }}</span></p>
+            <p class="m-0 pt-5 text-bold w-100">Cotización - <span class="gray-color">#{{ $quotation->id }}</span></p>
             <p class="m-0 pt-5 text-bold w-100">Orden - <span class="gray-color">@php echo Str::random(10);@endphp</span></p>
             <p class="m-0 pt-5 text-bold w-100">Fecha - <span class="gray-color">{{ $quotation->created_at }}</span></p>
         </div>

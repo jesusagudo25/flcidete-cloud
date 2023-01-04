@@ -27,7 +27,7 @@
                     <tr>
                         <td style="text-align:center;">
                             <a href="https://fablabcidete.com" title="logo" target="_blank">
-                                <img width="80" src="{{ asset('/images/resumido.png') }}" title="logo"
+                                <img width="80" src="http://agudodev.me/assets/img/resumido.png" title="logo"
                                     alt="logo">
                             </a>
                         </td>
@@ -51,7 +51,7 @@
                                             style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
                                             No podemos simplemente enviarle su antigua contraseña. Se ha generado para
-                                            usted un enlace único.. Para restablecer su
+                                            usted un enlace único. Para restablecer su
                                             contraseña, haga clic en el siguiente enlace.
                                         </p>
                                         <a href="http://localhost:3000/reset-password/{{ $token }}"
