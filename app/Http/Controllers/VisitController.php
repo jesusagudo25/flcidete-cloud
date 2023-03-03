@@ -118,9 +118,9 @@ class VisitController extends Controller
                     }
 
                     if ($customer == null) {
-                        $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
-                        $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
-                        $townships = Http::get('http://127.0.0.1:8001/api/townships')->collect();
+                        $provinces = Http::get('http://cloud.geoptyapi.xyz/api/provinces')->collect();
+                        $districts = Http::get('http://cloud.geoptyapi.xyz/api/districts')->collect();
+                        $townships = Http::get('http://cloud.geoptyapi.xyz/api/townships')->collect();
 
                         if ($item['sexo'] == 'Masculino' || substr($item['sexo'], 0, 1) == 'M') {
                             $type_sex_id = 1;

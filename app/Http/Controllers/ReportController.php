@@ -159,7 +159,7 @@ class ReportController extends Controller
             ->limit(3)
             ->get();
 
-        $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
+        $districts = Http::get('http://cloud.geoptyapi.xyz/api/districts')->collect();
 
         foreach ($districtsTop as $districtTop) {
             $result = $districts->where('id', $districtTop->district_id)->first();
