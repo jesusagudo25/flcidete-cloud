@@ -118,7 +118,7 @@
             <p class="m-0 pt-5 text-bold w-100">Fecha - <span class="gray-color">{{ $booking->date }}</span></p>
         </div>
         <div class="w-50 float-left logo mt-10">
-            <img src="https://explorando.xyz/FABLAB/assets/img/fab.png">
+            <img src="http://cloud.flcidete.xyz/images/fab.png">
         </div>
         <div style="clear: both;"></div>
     </div>
