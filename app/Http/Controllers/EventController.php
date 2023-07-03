@@ -74,7 +74,7 @@ class EventController extends Controller
             ->select('customers.*', 'events.name as event_name', 'events.id as event_id')
             ->get();
 
-        $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
+        $provinces = Http::get(config('config.geoptyapi').'/api/provinces')->collect();
 
         
         foreach ($customers as $customer) {

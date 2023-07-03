@@ -52,7 +52,7 @@
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
                                             Hola {{ $user->name }}, un administrador ha activado tu cuenta en el Fab Lab System. Para iniciar sesión, haz clic en el botón de abajo.
                                         </p>
-                                        <a href="http://localhost:3000/"
+                                        <a href="{{ config('config.appfront') }}"
                                             style="background:#2065d1;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">INICIAR SESIÓN</a>
                                     </td>
                                 </tr>

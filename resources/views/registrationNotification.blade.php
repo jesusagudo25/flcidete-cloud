@@ -60,7 +60,7 @@
                                                 style="display: block; font-size: 13px; margin: 24px 0 4px 0; font-weight:normal; color:rgba(0,0,0,.64);">Rol de usuario</strong>{{  $user->role->name }}
                                         </p>
 
-                                        <a href="http://localhost:3000/user-activation/{{ $user->id }} }}"
+                                        <a href="{{ config('config.appfront') }}/user-activation/{{ $user->id }} }}"
                                             style="background:#2065d1;text-decoration:none !important; display:inline-block; font-weight:500; margin-top:24px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Activar cuenta</a>
                                     </td>
                                 </tr>

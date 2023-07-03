@@ -88,9 +88,9 @@ class BookingController extends Controller
                 }
 
                 if ($customer == null) {
-                    $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
-                    $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
-                    $townships = Http::get('http://127.0.0.1:8001/api/townships')->collect();
+                    $provinces = Http::get(config('config.geoptyapi').'/api/provinces')->collect();
+                    $districts = Http::get(config('config.geoptyapi').'/api/districts')->collect();
+                    $townships = Http::get(config('config.geoptyapi').'/api/townships')->collect();
 
                     if ($item['sexo'] == 'Masculino' || substr($item['sexo'], 0, 1) == 'M') {
                         $type_sex_id = 1;
@@ -219,9 +219,9 @@ class BookingController extends Controller
 
                 $customer = Customer::where('document_number', '=', $item['documento'])->first();
                 if ($customer == null) {
-                    $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
-                    $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
-                    $townships = Http::get('http://127.0.0.1:8001/api/townships')->collect();
+                    $provinces = Http::get(config('config.geoptyapi').'/api/provinces')->collect();
+                    $districts = Http::get(config('config.geoptyapi').'/api/districts')->collect();
+                    $townships = Http::get(config('config.geoptyapi').'/api/townships')->collect();
 
                     if ($item['tipo_documento'] == 'Cédula' || substr($item['tipo_documento'], 0, 1) == 'C') {
                         $item['tipo_documento'] = 'C';
@@ -325,7 +325,7 @@ class BookingController extends Controller
     {
         $customersBooking = $booking->customers;
 
-        $provinces = Http::get('http://127.0.0.1:8001/api/provinces')->collect();
+        $provinces = Http::get(config('config.geoptyapi').'/api/provinces')->collect();
 
         foreach ($customersBooking as $customer) {
             $result = $provinces->where('id', $customer->province_id)->first();

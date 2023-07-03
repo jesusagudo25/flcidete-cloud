@@ -261,7 +261,7 @@ class AreaController extends Controller
             ->limit(5)
             ->get();
 
-        $districts = Http::get('http://127.0.0.1:8001/api/districts')->collect();
+        $districts = Http::get(config('config.geoptyapi').'/api/districts')->collect();
 
         foreach ($districtsTop as $districtTop) {
             $result = $districts->where('id', $districtTop->district_id)->first();
