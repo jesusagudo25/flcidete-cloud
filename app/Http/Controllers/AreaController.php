@@ -243,14 +243,21 @@ class AreaController extends Controller
             ->groupBy('area_visit.area_id')
             ->orderBy('total', 'desc')
             ->get()->take(4);
-
-
-        $areasPercentage = $timeDifferentAreas->map(function ($item, $key) use ($timeDifferentAreas) {
-            $item->percentage = round(($item->total * 100) / $timeDifferentAreas->sum('total'), 1);
-            return $item;
-        });
+        
+        
+    
+        if($timeDifferentAreas->sum('total') == 0){
+            $areasPercentage = [];
+        }
+        else{
+            $areasPercentage = $timeDifferentAreas->map(function ($item, $key) use ($timeDifferentAreas) {
+                $item->percentage = round(($item->total * 100) / $timeDifferentAreas->sum('total'), 1);
+                return $item;
+            });
+        }
 
         /* Distritos frecuentes  --------------  */
+        /* Por reparar: Hubo cambios en la tabla customers y subsidiaries */
         $districtsTop = Visit::whereBetween('visits.created_at', [$firstDayMonth, $lastDayMonthCurrent])
             ->where('visits.active', 1)
             ->join('customer_visit', 'visits.id', '=', 'customer_visit.visit_id')
@@ -261,12 +268,12 @@ class AreaController extends Controller
             ->limit(5)
             ->get();
 
-        $districts = Http::get(config('config.geoptyapi').'/api/districts')->collect();
+/*         $districts = Http::get(config('config.geoptyapi').'/api/districts')->collect();
 
         foreach ($districtsTop as $districtTop) {
             $result = $districts->where('id', $districtTop->district_id)->first();
             $districtTop->district_id = $result['name'];
-        }
+        } */
 
         /* Frecuencia de visitantes por género y edad  -------------- */
         $ageRangeByM = Visit::whereBetween('visits.created_at', [$firstDayMonth, $lastDayMonthCurrent])

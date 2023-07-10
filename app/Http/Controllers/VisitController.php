@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Imports\CustomersImport;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\Subsidiary;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Http;
+use PDO;
 
 class VisitController extends Controller
 {
@@ -32,17 +34,6 @@ class VisitController extends Controller
         return $visits;
     }
 
-    public function attend()
-    {
-
-        /* Get visits isAttended false */
-        $visits = Visit::with('reasonVisit', 'areas', 'customers')->where([
-            ['isAttended', '=', 0],
-            ['active', '=', 1]
-        ])->get();
-        return $visits;
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -53,20 +44,81 @@ class VisitController extends Controller
     {
         $filename = $request->hasFile('file') ? $request->file('file') : null;
         $customer_id = $request->has('customer_id') ? $request->customer_id : null;
+        $subsidiary_id = $request->has('subsidiary_id') ? $request->subsidiary_id : null;
         $booking_id = $request->has('booking_id') ? $request->booking_id : null;
 
         $customers = [];
         $temporalCustomers = [];
         $excelErrors = [];
 
+        //Si hay un booking_id, se valida que el booking exista
         if (empty($booking_id)) {
+
+            //Si no hay un booking_id, se valida que el archivo exista
             if (empty($filename)) {
-                if (empty($customer_id)) {
-                    $customer = Customer::create($request->all());
-                    $customers[] = $customer->id;
-                } else {
+                
+                if(empty($customer_id)){
+                    if($request->document_type != 'R'){
+                        $customer = Customer::create([
+                            'document_type' => $request->document_type,
+                            'document_number' => $request->document_number,
+                            'name' => $request->name,
+                            'email' => $request->email,
+                            'telephone' => $request->telephone,
+                            'age_range_id' => $request->age_range_id,
+                            'type_sex_id' => $request->type_sex_id,
+                            'province_id' => $request->province_id,
+                            'district_id' => $request->district_id,
+                            'township_id' => $request->township_id,
+                        ]);
+                        $customers[] = $customer->id;
+                    }
+                    else{
+                        $customer = Customer::create([
+                            'document_type' => $request->document_type,
+                            'document_number' => $request->document_number,
+                            'name' => null,
+                            'email' => null,
+                            'telephone' => null,
+                            'age_range_id'=> null,
+                            'type_sex_id' => 3,
+                            'province_id' => null,
+                            'district_id' => null,
+                            'township_id' => null,
+                        ]);
+
+                        Subsidiary::create([
+                            'customer_id' => $customer->id,
+                            'name' => $request->name,
+                            'email' => $request->email,
+                            'telephone' => $request->telephone,
+                            'province_id' => $request->province_id,
+                            'district_id' => $request->district_id,
+                            'township_id' => $request->township_id,
+                        ]);
+
+                        $customers[] = $customer->id;
+                    }
+                }
+                else if(empty($subsidiary_id)){
+                    Subsidiary::create([
+                        'customer_id' => $customer_id,
+                        'name' => $request->name,
+                        'email' => $request->email,
+                        'telephone' => $request->telephone,
+                        'province_id' => $request->province_id,
+                        'district_id' => $request->district_id,
+                        'township_id' => $request->township_id,
+                    ]);
+
                     $customers[] = $customer_id;
                 }
+                else{
+                    $customers[] = $customer_id;
+                }
+
+
+                
             } else {
                 $collectionExcel = Excel::toCollection(new CustomersImport, $filename);
                 //Validate name column
@@ -118,15 +170,9 @@ class VisitController extends Controller
                     }
 
                     if ($customer == null) {
-<<<<<<< HEAD
                         $provinces = Http::get(config('config.geoptyapi').'/api/provinces')->collect();
                         $districts = Http::get(config('config.geoptyapi').'/api/districts')->collect();
                         $townships = Http::get(config('config.geoptyapi').'/api/townships')->collect();
-=======
-                        $provinces = Http::get('http://cloud.geoptyapi.xyz/api/provinces')->collect();
-                        $districts = Http::get('http://cloud.geoptyapi.xyz/api/districts')->collect();
-                        $townships = Http::get('http://cloud.geoptyapi.xyz/api/townships')->collect();
->>>>>>> ffcf0111025953562878d75a581604f3c7431b86
 
                         if ($item['sexo'] == 'Masculino' || substr($item['sexo'], 0, 1) == 'M') {
                             $type_sex_id = 1;

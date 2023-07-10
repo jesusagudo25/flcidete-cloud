@@ -22,7 +22,6 @@ return new class extends Migration
                 ->onUpdate('cascade');
 
             $table->boolean('active')->default(true);
-            $table->boolean('isAttended')->default(false);
             $table->timestamps();
         });
     }

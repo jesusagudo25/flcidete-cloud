@@ -46,5 +46,9 @@ class AreaSeeder extends Seeder
         Area::create([
             'name' => 'Bordadora CNC',
         ]);
+
+        Area::create([
+            'name' => 'Impresión de gran formato',
+        ]);
     }
 }

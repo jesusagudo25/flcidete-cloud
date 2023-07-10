@@ -61,4 +61,9 @@ class TypeSexController extends Controller
     {
         //
     }
+
+    public function byType()
+    {
+        return TypeSex::whereNotIn('name', ['Persona jurídica'])->get();
+    }
 }

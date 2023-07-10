@@ -24,5 +24,10 @@ class TypeSexSeeder extends Seeder
             'id' => 2,
             'name' => 'Femenino',
         ]);
+
+        TypeSex::create([
+            'id' => 3,
+            'name' => 'Persona jurídica',
+        ]);
     }
 }

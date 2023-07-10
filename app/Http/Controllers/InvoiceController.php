@@ -68,7 +68,7 @@ class InvoiceController extends Controller
             'type_invoice' => $request->typeInvoice,
             'labor_time' => empty($request->laborTime) ? null : $request->laborTime,
             'date_delivery' => empty($request->dateDelivery) ? null : $request->dateDelivery,
-            'description' => empty($request->description) ? null : $request->description,
+            'comments' => empty($request->comments) ? null : $request->comments,
             'status' => $request->typeInvoice == 'A' ? 'A' : 'F',
         ]);
 

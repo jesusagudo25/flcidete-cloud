@@ -31,6 +31,7 @@ use App\Http\Controllers\SoftwareController;
 use App\Http\Controllers\SoftwareUpdateController;
 use App\Http\Controllers\StabilizerController;
 use App\Http\Controllers\StabilizerUpdateController;
+use App\Http\Controllers\SubsidiaryController;
 use App\Http\Controllers\TechExpenseController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\ThreadUpdateController;
@@ -110,8 +111,18 @@ Route::controller(CustomerController::class)->group(function(){
     Route::delete('/customers/{customer}', 'destroy');
 });
 
+Route::controller(SubsidiaryController::class)->group(function(){
+    Route::get('/subsidiaries', 'index');
+    Route::get('/subsidiaries/{subsidiary}', 'show');
+    Route::get('/subsidiaries/{customer}/{search}/', 'search');
+    Route::post('/subsidiaries', 'store');
+    Route::put('/subsidiaries/{subsidiary}', 'update');
+    Route::delete('/subsidiaries/{subsidiary}', 'destroy');
+});
+
 Route::controller(TypeSexController::class)->group(function(){
-    Route::get('/type-sexes', 'index');
+    Route::get('/type-sexes', 'byType');
+
 });
 
 Route::controller(AgeRangeController::class)->group(function(){

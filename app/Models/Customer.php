@@ -47,5 +47,9 @@ class Customer extends Model
     public function quotations(){
         return $this->hasMany(Quotation::class);
     }
+
+    public function subsidiaries(){
+        return $this->hasMany(Subsidiary::class);
+    }
     
 }
