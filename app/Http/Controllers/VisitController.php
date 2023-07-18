@@ -116,9 +116,6 @@ class VisitController extends Controller
                 else{
                     $customers[] = $customer_id;
                 }
-
-
-                
             } else {
                 $collectionExcel = Excel::toCollection(new CustomersImport, $filename);
                 //Validate name column

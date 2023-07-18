@@ -21,6 +21,9 @@ return new class extends Migration
             $table->foreignId('invoice_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
+            $table->text('description');
+            $table->string('unit');
+            $table->integer('quantity');
             $table->decimal('number_hours',4,2)->nullable();
             $table->decimal('cost_hour', 10, 2)->nullable();
             $table->decimal('extra', 8, 2)->nullable();

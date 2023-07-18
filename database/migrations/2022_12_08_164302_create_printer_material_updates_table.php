@@ -13,13 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('stabilizer_updates', function (Blueprint $table) {
+        Schema::create('printer_material_updates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('stabilizer_id')->constrained()
+            $table->foreignId('printer_material_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
+            $table->decimal('cost', 10, 2);
             $table->decimal('estimated_value', 10, 2);
-            $table->decimal('purchase_price', 10, 2);
+            $table->decimal('sale_price', 5, 2);
             $table->boolean('active')->default(true);
             $table->timestamps();
         });
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('stabilizer_updates');
+        Schema::dropIfExists('printer_material_updates');
     }
 };

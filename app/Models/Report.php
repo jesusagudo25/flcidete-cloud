@@ -36,17 +36,12 @@ class Report extends Model
             ->join('sums', 'invoices.id', '=', 'sums.invoice_id')
             ->sum('total');
 
-        $totalSalesSUS = Invoice::whereBetween('created_at', [$start_date, $end_date])
-            ->where('status','F')
-            ->join('suss', 'invoices.id', '=', 'suss.invoice_id')
-            ->sum('total');
-
         $totalSalesEmbroidery = Invoice::whereBetween('created_at', [$start_date, $end_date])
             ->where('status','F')
             ->join('su_embroideries', 'invoices.id', '=', 'su_embroideries.invoice_id')
             ->sum('total');
 
-        $useMachines = $totalSalesSUM + $totalSalesSUS + $totalSalesEmbroidery + $totalSalesEvents;
+        $useMachines = $totalSalesSUM + $totalSalesEmbroidery + $totalSalesEvents;
 
         /* Ingresos y gastos en eventos */
 
@@ -62,16 +57,6 @@ class Report extends Model
         $techExpenses = TechExpense::with('area')->whereBetween('tech_expenses.created_at', [$start_date, $end_date])
             ->where('tech_expenses.active', 1)
             ->sum('tech_expenses.amount');
-
-        /* Bordadora */
-
-        $threadUpdateExpenses = ThreadUpdate::whereBetween('thread_updates.created_at', [$start_date, $end_date])
-            ->where('thread_updates.active', 1)
-            ->sum('thread_updates.purchase_price');
-
-        $stabilizerUpdateExpenses = StabilizerUpdate::whereBetween('stabilizer_updates.created_at', [$start_date, $end_date])
-            ->where('stabilizer_updates.active', 1)
-            ->sum('stabilizer_updates.purchase_price');
 
         /* Cortadora de vinilo */
 
@@ -96,11 +81,6 @@ class Report extends Model
             ->where('resin_updates.active', 1)
             ->sum('resin_updates.purchase_price');
 
-        /* Softwares */
-        $softwaresExpenses = SoftwareUpdate::whereBetween('software_updates.created_at', [$start_date,$end_date])
-            ->where('software_updates.active', 1)
-            ->sum('software_updates.purchase_price');
-
         /* Materials Laser */
         $materialsLaserUpdateExpenses = LaserUpdate::whereBetween('laser_updates.created_at', [$start_date, $end_date])
             ->where('laser_updates.active', 1)
@@ -114,7 +94,7 @@ class Report extends Model
 
             return [
                 'income' => round($useMachines,2),
-                'expenses' => round($techExpenses + $threadUpdateExpenses + $stabilizerUpdateExpenses + $vinylUpdateExpenses + $componentsUpdateExpenses + $filamentsUpdateExpenses + $resinsUpdateExpenses + $softwaresExpenses + $materialsLaserUpdateExpenses + $millingUpdateExpenses + $eventsExpenses, 2),
+                'expenses' => round($techExpenses + $vinylUpdateExpenses + $componentsUpdateExpenses + $filamentsUpdateExpenses + $resinsUpdateExpenses + $materialsLaserUpdateExpenses + $millingUpdateExpenses + $eventsExpenses, 2),
             ];
     }
 }

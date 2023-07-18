@@ -13,14 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('sue_thread', function (Blueprint $table) {
-            $table->primary(array('su_embroidery_id', 'thread_id'));
-            $table->foreignId('su_embroidery_id')->constrained()
+        Schema::create('design_services', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('area_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->foreignId('thread_id')->constrained()
+            $table->foreignId('invoice_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
+            $table->string('unit');
+            $table->text('description');
+            $table->integer('quantity');
+            $table->decimal('base_cost', 10, 2);
+            $table->timestamps();
         });
     }
 
@@ -31,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sue_thread');
+        Schema::dropIfExists('design_services');
     }
 };

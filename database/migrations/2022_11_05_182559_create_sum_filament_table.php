@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('filament_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->integer('quantity');
+            $table->integer('quantity'); // in grams
             $table->decimal('price', 8, 2);
         });
     }

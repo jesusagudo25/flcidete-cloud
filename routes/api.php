@@ -22,15 +22,13 @@ use App\Http\Controllers\MaterialMillingController;
 use App\Http\Controllers\MillingUpdateController;
 use App\Http\Controllers\ObservationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PrinterMaterialController;
+use App\Http\Controllers\PrinterMaterialUpdateController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResinController;
 use App\Http\Controllers\ResinUpdateController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SoftwareController;
-use App\Http\Controllers\SoftwareUpdateController;
-use App\Http\Controllers\StabilizerController;
-use App\Http\Controllers\StabilizerUpdateController;
 use App\Http\Controllers\SubsidiaryController;
 use App\Http\Controllers\TechExpenseController;
 use App\Http\Controllers\ThreadController;
@@ -213,6 +211,23 @@ Route::controller(LaserUpdateController::class)->group(function(){
     Route::delete('/laser-updates/{laserUpdate}', 'destroy');
 });
 
+Route::controller(PrinterMaterialController::class)->group(function(){
+    Route::get('/printer-materials', 'index');
+    Route::get('/printer-materials/{printerMaterial}', 'show');
+    Route::get('/printer-materials/s/{search}/', 'search');
+    Route::post('/printer-materials', 'store');
+    Route::put('/printer-materials/{printerMaterial}', 'update');
+    Route::delete('/printer-materials/{printerMaterial}', 'destroy');
+});
+
+Route::controller(PrinterMaterialUpdateController::class)->group(function(){
+    Route::get('/printer-materials-updates', 'index');
+    Route::get('/printer-materials-updates/{printerMaterialUpdate}', 'show');
+    Route::post('/printer-materials-updates', 'store');
+    Route::put('/printer-materials-updates/{printerMaterialUpdate}', 'update');
+    Route::delete('/printer-materials-updates/{printerMaterialUpdate}', 'destroy');
+});
+
 Route::controller(VinylController::class)->group(function(){
     Route::get('/vinyls', 'index');
     Route::get('/vinyls/{vinyl}', 'show');
@@ -264,23 +279,6 @@ Route::controller(ResinUpdateController::class)->group(function(){
     Route::delete('/resins-updates/{resinUpdate}', 'destroy');
 });
 
-Route::controller(SoftwareController::class)->group(function(){
-    Route::get('/softwares', 'index');
-    Route::get('/softwares/{software}', 'show');
-    Route::get('/softwares/s/{search}/', 'search');
-    Route::post('/softwares', 'store');
-    Route::put('/softwares/{software}', 'update');
-    Route::delete('/softwares/{software}', 'destroy');
-});
-
-Route::controller(SoftwareUpdateController::class)->group(function(){
-    Route::get('/softwares-updates', 'index');
-    Route::get('/softwares-updates/{softwareUpdate}', 'show');
-    Route::post('/softwares-updates', 'store');
-    Route::put('/softwares-updates/{softwareUpdate}', 'update');
-    Route::delete('/softwares-updates/{softwareUpdate}', 'destroy');
-});
-
 Route::controller(ThreadController::class)->group(function(){
     Route::get('/threads', 'index');
     Route::get('/threads/{thread}', 'show');
@@ -296,23 +294,6 @@ Route::controller(ThreadUpdateController::class)->group(function(){
     Route::post('/threads-updates', 'store');
     Route::put('/threads-updates/{threadUpdate}', 'update');
     Route::delete('/threads-updates/{threadUpdate}', 'destroy');
-});
-
-Route::controller(StabilizerController::class)->group(function(){
-    Route::get('/stabilizers', 'index');
-    Route::get('/stabilizers/{stabilizer}', 'show');
-    Route::get('/stabilizers/s/{search}/', 'search');
-    Route::post('/stabilizers', 'store');
-    Route::put('/stabilizers/{stabilizer}', 'update');
-    Route::delete('/stabilizers/{stabilizer}', 'destroy');
-});
-
-Route::controller(StabilizerUpdateController::class)->group(function(){
-    Route::get('/stabilizers-updates', 'index');
-    Route::get('/stabilizers-updates/{stabilizerUpdate}', 'show');
-    Route::post('/stabilizers-updates', 'store');
-    Route::put('/stabilizers-updates/{stabilizerUpdate}', 'update');
-    Route::delete('/stabilizers-updates/{stabilizerUpdate}', 'destroy');
 });
 
 Route::controller(EventController::class)->group(function(){

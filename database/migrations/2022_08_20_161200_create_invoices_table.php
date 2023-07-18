@@ -21,12 +21,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->text('description')->nullable();
+            $table->text('observations')->nullable();
             $table->bigInteger('receipt')->nullable();
-            $table->char('type_sale', 1);
             $table->char('type_invoice', 1);
-            $table->date('date_delivery')->nullable();
-            $table->decimal('labor_time',4,2)->nullable();
             $table->decimal('total', 6, 2);
             /*
             * A = Active: Una factura es activa cuando se crea y se puede editar (Contrario a cuando se finaliza inmediatamente)

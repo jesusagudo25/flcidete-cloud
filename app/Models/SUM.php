@@ -13,6 +13,9 @@ class SUM extends Model
     protected $fillable = [
         'area_id',
         'invoice_id',
+        'unit',
+        'quantity',
+        'description',
         'number_hours',
         'cost_hour',
         'extra',

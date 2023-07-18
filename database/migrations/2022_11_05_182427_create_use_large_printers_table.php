@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('suss', function (Blueprint $table) {
+        Schema::create('use_large_printers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('area_id')->constrained()
                 ->onDelete('cascade')
@@ -21,14 +21,18 @@ return new class extends Migration
             $table->foreignId('invoice_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->foreignId('softwares_id')->constrained()
+            $table->string('unit');
+            $table->foreignId('printer_material_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->decimal('number_hours',4,2);
-            $table->decimal('cost_hour', 10, 2);
+            $table->text('description');
+            $table->integer('width'); // in ft
+            $table->integer('height'); // in ft
+            $table->integer('quantity');
             $table->decimal('extra', 8, 2)->nullable();
             $table->text('extra_description')->nullable();
             $table->decimal('base_cost', 10, 2);
+            $table->timestamps();
         });
     }
 
@@ -39,6 +43,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('suss');
+        Schema::dropIfExists('use_large_printers');
     }
 };

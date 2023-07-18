@@ -13,18 +13,27 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('threads', function (Blueprint $table) {
+        Schema::create('printer_materials', function (Blueprint $table) {
             $table->id();
+            
             $table->string('name');
-
-            //Current estimated value, price purchase and purchased amount*************
+            
+            $table->decimal('cost', 8, 2);
+            
             $table->decimal('estimated_value', 8, 2);
+
+            $table->decimal('sale_price', 5, 2); 
+
+            $table->integer('width'); // feet
+            $table->integer('width_in_inches');
             
-            $table->decimal('price_purchase', 10, 2);
-            
-            $table->integer('purchased_amount');
+            $table->integer('height'); //Feet
+            $table->integer('height_in_meters'); 
+
+            $table->integer('area'); // Feet
             
             $table->boolean('active')->default(true);
+
             $table->timestamps();
         });
     }
@@ -36,6 +45,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('threads');
+        Schema::dropIfExists('printer_materials');
     }
 };

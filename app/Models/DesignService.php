@@ -5,33 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SUEmbroidery extends Model
+class DesignService extends Model
 {
     use HasFactory;
-
-    protected $table = 'su_embroideries';
 
     protected $fillable = [
         'area_id',
         'invoice_id',
         'unit',
-        'quantity',
         'description',
-        'hoop_size',
-        'embroidery_size',
-        'embroidery_cost',
-        'extra',
-        'extra_description',
-        'base_cost'
+        'quantity',
+        'base_cost',
     ];
 
-    public $timestamps = false;
-
-    public function invoice(){
+    public function invoice()
+    {
         return $this->belongsTo(Invoice::class);
     }
 
-    public function area(){
+    public function area()
+    {
         return $this->belongsTo(Area::class);
     }
 }

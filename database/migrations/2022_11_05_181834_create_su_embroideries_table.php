@@ -21,15 +21,12 @@ return new class extends Migration
             $table->foreignId('invoice_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->foreignId('stabilizer_id')->constrained()
-                ->onDelete('cascade')
-                ->onUpdate('cascade')
-                ->nullable();
+            $table->text('description');
+            $table->string('unit');
             $table->string('hoop_size')->nullable();
             $table->string('embroidery_size')->nullable();
+            $table->integer('quantity');
             $table->decimal('embroidery_cost', 10, 2)->nullable();
-            $table->decimal('number_hours',4,2)->nullable();
-            $table->decimal('cost_hour', 10, 2)->nullable();
             $table->decimal('extra', 8, 2)->nullable();
             $table->text('extra_description')->nullable();
             $table->decimal('base_cost', 10, 2);

@@ -40,15 +40,15 @@ class AreaSeeder extends Seeder
         ]);
 
         Area::create([
-            'name' => 'Softwares',
-        ]);
-
-        Area::create([
             'name' => 'Bordadora CNC',
         ]);
 
         Area::create([
-            'name' => 'Impresión de gran formato',
+            'name' => 'Impresora de gran formato',
+        ]);
+
+        Area::create([
+            'name' => 'Diseño',
         ]);
     }
 }

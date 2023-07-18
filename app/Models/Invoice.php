@@ -13,11 +13,8 @@ class Invoice extends Model
         'receipt',
         'user_id',
         'customer_id',
-        'type_sale',
-        'date_delivery',
-        'labor_time',
         'total',
-        'description',
+        'observations',
         'type_invoice',
         'status',
     ];
@@ -42,9 +39,14 @@ class Invoice extends Model
         return $this->hasMany(SUM::class);
     }
 
-    public function sus()
+    public function designServices()
     {
-        return $this->hasMany(SUS::class);
+        return $this->hasMany(DesignService::class);
+    }
+
+    public function useLargePrinters()
+    {
+        return $this->hasMany(UseLargePrinter::class);
     }
 
     public function suEmbroidery()
@@ -56,5 +58,7 @@ class Invoice extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+
 
 }

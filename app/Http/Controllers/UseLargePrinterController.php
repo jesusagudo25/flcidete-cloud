@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SUS;
+use App\Models\UseLargePrinter;
 use Illuminate\Http\Request;
 
-class SUSController extends Controller
+class UseLargePrinterController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -31,10 +31,10 @@ class SUSController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\SUS  $sus
+     * @param  \App\Models\UseLargePrinter  $useLargePrinter
      * @return \Illuminate\Http\Response
      */
-    public function show(SUS $sus)
+    public function show(UseLargePrinter $useLargePrinter)
     {
         //
     }
@@ -43,10 +43,10 @@ class SUSController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\SUS  $sus
+     * @param  \App\Models\UseLargePrinter  $useLargePrinter
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, SUS $sus)
+    public function update(Request $request, UseLargePrinter $useLargePrinter)
     {
         //
     }
@@ -54,10 +54,10 @@ class SUSController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\SUS  $sus
+     * @param  \App\Models\UseLargePrinter  $useLargePrinter
      * @return \Illuminate\Http\Response
      */
-    public function destroy(SUS $sus)
+    public function destroy(UseLargePrinter $useLargePrinter)
     {
         //
     }
