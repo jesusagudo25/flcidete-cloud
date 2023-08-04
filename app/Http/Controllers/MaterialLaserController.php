@@ -78,45 +78,55 @@ class MaterialLaserController extends Controller
      */
     public function update(Request $request, MaterialLaser $materialLaser)
     {
+
+        if ($request->has('active') && count($request->all()) == 1) {
+            MaterialLaser::where('id', $materialLaser->id)
+                ->update([
+                    'active' => $request->active
+                ]);
+
+            return response()->json([
+                'message' => 'Material Laser updated successfully'
+            ], 200);
+        }
+
         $materialLaserUpdates =  $materialLaser->laserUpdates()->where('active', 1)->count();
 
-        if($materialLaserUpdates > 0){
+        if ($materialLaserUpdates > 0) {
 
-            if($request->width != $materialLaser->width || $request->height != $materialLaser->height){
+            if ($request->width != $materialLaser->width || $request->height != $materialLaser->height) {
                 MaterialLaser::where('id', $materialLaser->id)
-                ->update($request->all());
+                    ->update($request->all());
 
-                $materialLaser->area = ($request->area ) * $materialLaserUpdates;
+                $materialLaser->area = ($request->area) * $materialLaserUpdates;
 
                 $materialLaser::where('id', $materialLaser->id)
-                ->update([
-                    'area' => $materialLaser->area
-                ]);
-            }
-            else{
+                    ->update([
+                        'area' => $materialLaser->area
+                    ]);
+            } else {
                 MaterialLaser::where('id', $materialLaser->id)
+                    ->update([
+                        'name' => $request->name,
+                        'cost' => $request->cost,
+                        'purchase_price' => $request->purchase_price,
+                        'estimated_value' => $request->estimated_value,
+                        'percentage' => $request->percentage,
+                        'sale_price' => $request->sale_price,
+                    ]);
+            }
+        } else {
+            MaterialLaser::where('id', $materialLaser->id)
                 ->update([
                     'name' => $request->name,
                     'cost' => $request->cost,
-                    'purchase_price' => $request->purchase_price,
                     'estimated_value' => $request->estimated_value,
+                    'purchase_price' => $request->purchase_price,
                     'percentage' => $request->percentage,
                     'sale_price' => $request->sale_price,
+                    'width' => $request->width,
+                    'height' => $request->height,
                 ]);
-            }
-        }
-        else{
-            MaterialLaser::where('id', $materialLaser->id)
-            ->update([
-                'name' => $request->name,
-                'cost' => $request->cost,
-                'estimated_value' => $request->estimated_value,
-                'purchase_price' => $request->purchase_price,
-                'percentage' => $request->percentage,
-                'sale_price' => $request->sale_price,
-                'width' => $request->width,
-                'height' => $request->height,
-            ]);
         }
     }
 

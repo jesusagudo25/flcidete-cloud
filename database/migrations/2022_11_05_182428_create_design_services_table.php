@@ -25,7 +25,6 @@ return new class extends Migration
             $table->text('description');
             $table->integer('quantity');
             $table->decimal('base_cost', 10, 2);
-            $table->timestamps();
         });
     }
 

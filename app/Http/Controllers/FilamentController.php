@@ -85,7 +85,20 @@ class FilamentController extends Controller
      */
     public function update(Request $request, Filament $filament)
     {
+        if ($request->has('active') && count($request->all()) == 1) {
+            Filament::where('id', $filament->id)
+            ->update([
+                'active' => $request->active
+            ]);
+
+            return response()->json([
+                'message' => 'Filament updated successfully'
+            ], 200);
+
+        }
+
         $filamentUpdates = $filament->filamentUpdates()->where('active',1)->count();
+        
         if($filamentUpdates > 0){
             if($request->purchased_weight != $filament->purchased_weight){
                 Filament::where('id', $filament->id)->update($request->all());

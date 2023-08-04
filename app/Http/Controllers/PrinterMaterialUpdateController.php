@@ -74,7 +74,7 @@ class PrinterMaterialUpdateController extends Controller
             'active' => $request->active,
         ]);
 
-        $printerMaterial = PrinterMaterialUpdate::where('id', $printerMaterialUpdate->printer_material_id)->first();
+        $printerMaterial = $printerMaterialUpdate->printerMaterial;
 
         if($request->active){
             $printerMaterial->update([
@@ -83,7 +83,7 @@ class PrinterMaterialUpdateController extends Controller
         }
         else{
             $area = $printerMaterial->area - ($printerMaterial->width * $printerMaterial->height);
-            if($area < 0){
+            if($area < 5){
                 $printerMaterial->update([
                     'area' => 0,
                 ]);

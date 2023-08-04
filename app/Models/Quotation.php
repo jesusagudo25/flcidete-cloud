@@ -11,8 +11,9 @@ class Quotation extends Model
 
     protected $fillable = [
         'customer_id',
+        'subsidiary_id',
         'user_id',
-        'description',
+        'observations',
         'total',
     ];
 
@@ -24,6 +25,11 @@ class Quotation extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function quoteDetails()
+    {
+        return $this->hasMany(QuoteDetail::class);
     }
     
 }

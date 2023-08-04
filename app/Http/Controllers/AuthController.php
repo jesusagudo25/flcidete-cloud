@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -41,6 +42,19 @@ class AuthController extends Controller
             ], 401);
         }
 
+        //validate if user has access token
+        $token = PersonalAccessToken::where('tokenable_id', Auth::id())->first();
+
+        if($token){
+            $token->delete();
+
+            return response()->json([
+                'status' => 'wrong',
+                'message' => 'User already logged in, for security reasons you have been logged out'
+            ], 401);
+        }
+
+        //create token
         $token = Auth::user()->createToken(Auth::id())->plainTextToken;
         $user = auth()->user();
 
@@ -211,4 +225,41 @@ class AuthController extends Controller
 
     }
 
+        /**
+     * xxxx
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function validateTokenAccess(Request $request){
+        $request->validate([
+            'token' => 'required|string',
+            'id' => 'required|integer'
+        ]);
+
+        $user = \Laravel\Sanctum\PersonalAccessToken::findToken($request->token);
+
+        if($user->tokenable_id != $request->id){
+            return response()->json([
+                'status' => 'wrong',
+                'message' => 'This token is invalid.'
+            ], 404);
+        }
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'wrong',
+                'message' => 'This token is invalid.'
+            ], 404);
+        }
+        else{
+            $response = [
+                'status' => 'success',
+                'message' => 'Token is valid',
+                'token' => $request->token,
+            ];
+
+            return response()->json($response,200);
+        }
+        
+    }
 }

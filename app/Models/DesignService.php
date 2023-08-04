@@ -18,6 +18,8 @@ class DesignService extends Model
         'base_cost',
     ];
 
+    public $timestamps = false;
+
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);

@@ -147,25 +147,29 @@
                 <th class="w-50">Fecha de finalización</th>
             </tr>
             <tr>
-                <td>{{ $report->start_date }}</td>
-                <td>{{ $report->end_date }}</td>
+                <td align="center">{{ $report->start_date }}</td>
+                <td align="center">{{ $report->end_date }}</td>
             </tr>
         </table>
     </div>
-
-    {{-- One page --}}
     <div class="table-section bill-tbl w-100 mt-10">
         <table class="table w-48 mt-10" style="float: left">
             <tr>
                 <th class="w-50">Clientes frecuentes</th>
                 <th class="w-15">Total</th>
             </tr>
-            @foreach ($customersTop as $customer)
+            @if ($customersTop->count() == 0)
                 <tr align="center">
-                    <td>{{ $customer->name }}</td>
-                    <td>{{ $customer->total }}</td>
+                    <td colspan="2" >No hay datos</td>
                 </tr>
-            @endforeach
+            @else
+                @foreach ($customersTop as $customer)
+                    <tr align="center">
+                        <td>{{ $customer->name }}</td>
+                        <td>{{ $customer->total }}</td>
+                    </tr>
+                @endforeach
+            @endif
         </table>
 
         <table class="table w-48 mt-10" style="float: right">
@@ -173,12 +177,18 @@
                 <th class="w-50">Distritos frecuentes</th>
                 <th class="w-15">Total</th>
             </tr>
-            @foreach ($districtsTop as $district)
+            @if ($districtsTop->count() == 0)
                 <tr align="center">
-                    <td>{{ $district->district_id }}</td>
-                    <td>{{ $district->total }}</td>
+                    <td colspan="2" >No hay datos</td>
                 </tr>
-            @endforeach
+            @else
+                @foreach ($districtsTop as $district)
+                    <tr align="center">
+                        <td>{{ $district->district_id }}</td>
+                        <td>{{ $district->total }}</td>
+                    </tr>
+                @endforeach
+            @endif
         </table>
 
         <div style="clear: both;"></div>
@@ -190,6 +200,7 @@
                 <th class="w-15">Horas</th>
                 <th class="w-15">% del total</th>
             </tr>
+            @php $totalT = 0; @endphp
             @foreach ($timeDifferentAreas as $area)
                 <tr align="center">
                     <td>{{ $area->name }}</td>
@@ -198,7 +209,13 @@
                         {{ $area->total ? round(($area->total / $totalTime) * 100, 2) : 0 }}%</td>
                     }}</td>
                 </tr>
+                @php $totalT += $area->total; @endphp
             @endforeach
+            <tr align="center">
+                <th><strong>Total</strong></th>
+                <th><strong>{{ $totalT }}</strong></th>
+                <th><strong>{{ $totalTime ? round(($totalT / $totalTime) * 100, 2) : 0 }}%</strong></th>
+            </tr>
         </table>
     </div>
     <div class="table-section bill-tbl w-100 mt-10">
@@ -208,15 +225,22 @@
                 <th class="w-15">Horas</th>
                 <th class="w-15">% del total</th>
             </tr>
+            @php $totalTR = 0; @endphp
             @foreach ($timeDifferentReasonVisit as $reason)
                 <tr align="center">
-                    <td>{{ $reason->name }}</td>
-                    <td>{{ $reason->total ? $reason->total : 0 }}</td>
+                    <td>{{ $reason['name'] }}</td>
+                    <td>{{ $reason['total'] ? $reason['total'] : 0 }}</td>
                     <td>
-                        {{ $reason->total ? round(($reason->total / $totalTime) * 100, 2) : 0 }}%</td>
+                        {{ $reason['total'] ? round(($reason['total'] / $timeTotalReason) * 100, 2) : 0 }}%</td>
                     }}</td>
                 </tr>
+                @php $totalTR += $reason['total']; @endphp
             @endforeach
+            <tr align="center">
+                <th><strong>Total</strong></th>
+                <th><strong>{{ $totalTR }}</strong></th>
+                <th><strong>{{ $timeTotalReason ? round(($totalTR / $timeTotalReason) * 100, 2) : 0 }}%</strong></th>
+            </tr>
         </table>
     </div>
 
@@ -251,24 +275,10 @@
         </table>
 
         <div style="clear: both;"></div>
-
-        <table class="table w-48 mt-10" style="float: right; margin: -50px 0px 0 0">
-            <tr>
-                <th class="w-50">Reservas por estado</th>
-                <th class="w-15">Total</th>
-            </tr>
-            <tr align="center">
-                <td>Ejecutadas</td>
-                <td>{{ $totalBookingsD }}</td>
-            </tr>
-            <tr align="center">
-                <td>Canceladas</td>
-                <td>{{ $totalBookingsC }}</td>
-            </tr>
-        </table>
     </div>
 
     <div style="clear: both;"></div>
+
 
     @if ($observations->count() > 0)
         <div class="table-section bill-tbl w-100 mt-30">
@@ -323,43 +333,25 @@
                 <th class="w-50">Fecha de finalización</th>
             </tr>
             <tr>
-                <td>{{ $report->start_date }}</td>
-                <td>{{ $report->end_date }}</td>
+                <td align="center">{{ $report->start_date }}</td>
+                <td align="center">{{ $report->end_date }}</td>
             </tr>
         </table>
     </div>
+
     <div class="table-section bill-tbl w-100 mt-10">
-        <table class="table w-48 mt-10" style="float: left">
+        <table class="table w-100 mt-10">
             <tr>
-                <th class="w-50">Servicios</th>
-                <th class="w-15">Cantidad</th>
+                <th class="w-50" colspan="2">Ventas por tipo de cliente</th>
+            <tr>
+                <th class="w-50">Personas</th>
+                <th class="w-50">Empresas/Instituciones</th>
             </tr>
-            <tr align="center">
-                <td>Áreas</td>
-                <td>{{ $totalSalesSUM }}</td>
-            </tr>
-            <tr align="center">
-                <td>Eventos</td>
-                <td>{{ $totalSalesEvents }}</td>
+            <tr>
+                <td align="center">{{ $SalesPerPerson }}</td>
+                <td align="center">{{ $SalesByCompany }}</td>
             </tr>
         </table>
-
-        <table class="table w-48 mt-10" style="float: right">
-            <tr>
-                <th class="w-50">Tipos de ventas</th>
-                <th class="w-15">Cantidad</th>
-            </tr>
-            <tr align="center">
-                <td>Maker</td>
-                <td>{{ $totalSalesMaker }}</td>
-            </tr>
-            <tr align="center">
-                <td>Servicios</td>
-                <td>{{ $totalSalesServices }}</td>
-            </tr>
-        </table>
-
-        <div style="clear: both;"></div>
     </div>
 
     <div class="table-section bill-tbl w-100 mt-10">
@@ -370,48 +362,51 @@
                 <th class="w-15">Egresos</th>
                 <th class="w-15">Diferencia</th>
             </tr>
-            @php($incomeSUM = 0.00)
-            @php($expensesSUM = 0.00)
-            @php($totalSUM = 0.00)
+            @php($incomeSUM = 0.0)
+            @php($expensesSUM = 0.0)
+            @php($totalSUM = 0.0)
             @foreach ($SUMIncome as $item)
                 <tr align="center">
                     <td>{{ $item['name'] }}</td>
-                    <td>$ {{ $item['ingresos'] ? $item['ingresos'] : 0.00 }}</td>
+                    <td>$ {{ number_format($item['ingresos'] ? $item['ingresos'] : 0.0, 2) }}</td>
                     @php($incomeSUM += $item['ingresos'])
-                    <td>$ {{ $item['egresos'] ? $item['egresos'] : 0.00 }}</td>
+                    <td>$ {{ number_format($item['egresos'] ? $item['egresos'] : 0.0, 2) }}</td>
                     @php($expensesSUM += $item['egresos'])
-                    <td>$ {{ $item['ingresos'] - $item['egresos'] }}</td>
+                    <td>$ {{ number_format($item['ingresos'] - $item['egresos'], 2) }}</td>
                     @php($totalSUM += $item['ingresos'] - $item['egresos'])
                 </tr>
             @endforeach
             <tr>
-                <th class="w-50">Totales</th>
-                <th class="w-15">$ {{ $incomeSUM }}</th>
-                <th class="w-15">$ {{ $expensesSUM }}</th>
-                <th class="w-15">$ {{ $totalSUM }}</th>
+                <th class="w-50">Total</th>
+                <th class="w-15">$ {{ number_format($incomeSUM, 2) }}</th>
+                <th class="w-15">$ {{ number_format($expensesSUM, 2) }}</th>
+                <th class="w-15">$ {{ number_format($totalSUM, 2) }}</th>
             </tr>
         </table>
     </div>
+
+    @php($incomeEvents = 0.0)
+    @php($expensesEvents = 0.0)
+    @php($totalEvents = 0.0)
+    {{-- Page new --}}
+    <div class="page_break"></div>
     <div class="table-section bill-tbl w-100 mt-10">
         <table class="table w-100 mt-10">
             <tr>
                 <th class="w-50">Eventos</th>
                 <th class="w-15">Ingresos</th>
                 <th class="w-15">Egresos</th>
-                <th class="w-15">Diferencia</th>
+                <th class="w-15">Total</th>
             </tr>
-            @php($incomeEvents = 0.00)
-            @php($expensesEvents = 0.00)
-            @php($totalEvents = 0.00)
             @if ($eventsExpensesIncome)
                 @foreach ($eventsExpensesIncome as $event)
                     <tr align="center">
                         <td>{{ $event['name'] }}</td>
-                        <td>$ {{ $event['ingresos'] }}</td>
+                        <td>$ {{ number_format($event['ingresos'] ? $event['ingresos'] : 0.0, 2) }}</td>
                         @php($incomeEvents += $event['ingresos'])
-                        <td>$ {{ $event['egresos'] }}</td>
+                        <td>$ {{ number_format($event['egresos'] ? $event['egresos'] : 0.0, 2) }}</td>
                         @php($expensesEvents += $event['egresos'])
-                        <td>$ {{ $event['ingresos'] - $event['egresos'] }}</td>
+                        <td>$ {{ number_format($event['ingresos'] - $event['egresos'], 2) }}</td>
                         @php($totalEvents += $event['ingresos'] - $event['egresos'])
                     </tr>
                 @endforeach
@@ -421,14 +416,13 @@
                 </tr>
             @endif
             <tr>
-                <th class="w-50">Totales</th>
-                <th class="w-15">$ {{ $incomeEvents }}</th>
-                <th class="w-15">$ {{ $expensesEvents }}</th>
-                <th class="w-15">$ {{ $totalEvents }}</th>
+                <th class="w-50">Total</th>
+                <th class="w-15">$ {{ number_format($incomeEvents, 2) }}</th>
+                <th class="w-15">$ {{ number_format($expensesEvents, 2) }}</th>
+                <th class="w-15">$ {{ number_format($totalEvents, 2) }}</th>
             </tr>
         </table>
     </div>
-
     {{-- Page new --}}
     <div class="page_break"></div>
 
@@ -445,7 +439,7 @@
                     <tr align="center">
                         <td>{{ $expense['name'] }}</td>
                         <td>{{ $expense['area']['name'] }}</td>
-                        <td>$ {{ $expense['amount'] }}</td>
+                        <td>$ {{ number_format($expense['amount'], 2) }}</td>
                         @php($totalTechExpenses += $expense['amount'])
                     </tr>
                 @endforeach
@@ -455,11 +449,14 @@
                 </tr>
             @endif
             <tr>
-                <th class="w-50"  style="text-align: right" colspan="2" >Total</th>
-                <th class="w-15">$ {{ $totalTechExpenses }}</th>
+                <th class="w-50" style="text-align: right" colspan="2">Total</th>
+                <th class="w-15">$ {{ number_format($totalTechExpenses, 2) }}</th>
             </tr>
         </table>
     </div>
+
+    {{-- Page new --}}
+    <div class="page_break"></div>
 
     <div class="table-section bill-tbl w-100 mt-10">
         <table class="table w-100 mt-10">
@@ -469,9 +466,9 @@
                 <th class="w-15">Total de diferencia</th>
             </tr>
             <tr align="center">
-                <td>$ {{ $incomeSUM + $incomeEvents }}</td>
-                <td>$ {{ $expensesSUM + $expensesEvents + $totalTechExpenses }}</td>
-                <td>$ {{ ($totalSUM + $totalEvents) - $totalTechExpenses }}</td>
+                <td>$ {{ number_format($incomeSUM + $incomeEvents, 2) }}</td>
+                <td>$ {{ number_format($expensesSUM + $expensesEvents, 2) }}</td>
+                <td>$ {{ number_format($totalSUM + $totalEvents, 2) }}</td>
             </tr>
         </table>
     </div>
@@ -480,7 +477,7 @@
         <table class="table w-100 mt-10">
             <tr>
                 <th class="w-15">Donaciones totales</th>
-                <th class="w-15">$ {{ $donationTotal }}</th>
+                <td class="w-15" align="center">$ {{ number_format($donationTotal, 2) }}</td>
             </tr>
         </table>
     </div>

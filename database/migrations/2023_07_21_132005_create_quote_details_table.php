@@ -13,19 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('quotations', function (Blueprint $table) {
+        Schema::create('quote_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained()
+            $table->foreignId('quotation_id')->constrained()
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-            $table->foreignId('subsidiary_id')->nullable()
-                ->constrained()
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-            $table->foreignId('user_id')->constrained()
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-            $table->text('observations')->nullable();
+            $table->text('description');
+            $table->integer('quantity');
+            $table->string('unit');
+            $table->decimal('unit_price', 6, 2);
             $table->decimal('total', 6, 2);
             $table->timestamps();
         });
@@ -38,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('quotations');
+        Schema::dropIfExists('quote_details');
     }
 };

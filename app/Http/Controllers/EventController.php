@@ -108,6 +108,16 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
+        //if only has active
+        if($request->has('active') && !$request->name){
+            Event::where('id', $event->id)->update(
+                [
+                    'active' => $request->active,
+                ]
+            );
+            return;
+        }
+
         Event::where('id', $event->id)->update(
             [
                 'name' => $request->name,

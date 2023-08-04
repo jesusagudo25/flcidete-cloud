@@ -13,6 +13,7 @@ class Invoice extends Model
         'receipt',
         'user_id',
         'customer_id',
+        'subsidiary_id',
         'total',
         'observations',
         'type_invoice',
@@ -49,14 +50,19 @@ class Invoice extends Model
         return $this->hasMany(UseLargePrinter::class);
     }
 
-    public function suEmbroidery()
+    public function suEmbroderies()
     {
-        return $this->hasMany(SUEmbroidery::class);
+        return $this->hasMany(SuEmbroidery::class);
     }
 
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function subsidiary()
+    {
+        return $this->belongsTo(Subsidiary::class);
     }
 
 

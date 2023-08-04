@@ -13,6 +13,7 @@ class PrinterMaterial extends Model
         'name',
         'cost',
         'estimated_value',
+        'purchase_price',
         'sale_price',
         'width',
         'width_in_inches',

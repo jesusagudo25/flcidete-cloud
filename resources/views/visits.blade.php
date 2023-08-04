@@ -130,9 +130,9 @@
     <div class="add-detail">
         <div class="w-50 float-left mt-10">
             <p class="m-0 pt-5 text-bold w-100">Reporte - <span class="gray-color">#{{ $report->id }}</span></p>
-            <p class="m-0 pt-5 text-bold w-100">Tipo - <span class="gray-color">Visitas y Reservaciones</span></p>
-            <p class="m-0 pt-5 text-bold w-100">Usuario - <span class="gray-color">{{ $report->user->name }}</span>
-            </p>
+            <p class="m-0 pt-5 text-bold w-100">Tipo - <span class="gray-color">Visitas</span></p>
+            <p class="m-0 pt-5 text-bold w-100">Usuario - <span class="gray-color">{{ $report->user->name }}</span></p>
+            <p class="m-0 pt-5 text-bold w-100">Total de visitas - <span class="gray-color">{{ $totalVisits }}</span></p>
 
         </div>
         <div class="w-50 float-left logo mt-10">
@@ -147,8 +147,8 @@
                 <th class="w-50">Fecha de finalización</th>
             </tr>
             <tr>
-                <td>{{ $report->start_date }}</td>
-                <td>{{ $report->end_date }}</td>
+                <td align="center">{{ $report->start_date }}</td>
+                <td align="center">{{ $report->end_date }}</td>
             </tr>
         </table>
     </div>
@@ -158,12 +158,18 @@
                 <th class="w-50">Clientes frecuentes</th>
                 <th class="w-15">Total</th>
             </tr>
-            @foreach ($customersTop as $customer)
+            @if ($customersTop->count() == 0)
                 <tr align="center">
-                    <td>{{ $customer->name }}</td>
-                    <td>{{ $customer->total }}</td>
+                    <td colspan="2" >No hay datos</td>
                 </tr>
-            @endforeach
+            @else
+                @foreach ($customersTop as $customer)
+                    <tr align="center">
+                        <td>{{ $customer->name }}</td>
+                        <td>{{ $customer->total }}</td>
+                    </tr>
+                @endforeach
+            @endif
         </table>
 
         <table class="table w-48 mt-10" style="float: right">
@@ -171,12 +177,18 @@
                 <th class="w-50">Distritos frecuentes</th>
                 <th class="w-15">Total</th>
             </tr>
-            @foreach ($districtsTop as $district)
+            @if ($districtsTop->count() == 0)
                 <tr align="center">
-                    <td>{{ $district->district_id }}</td>
-                    <td>{{ $district->total }}</td>
+                    <td colspan="2" >No hay datos</td>
                 </tr>
-            @endforeach
+            @else
+                @foreach ($districtsTop as $district)
+                    <tr align="center">
+                        <td>{{ $district->district_id }}</td>
+                        <td>{{ $district->total }}</td>
+                    </tr>
+                @endforeach
+            @endif
         </table>
 
         <div style="clear: both;"></div>
@@ -188,6 +200,7 @@
                 <th class="w-15">Horas</th>
                 <th class="w-15">% del total</th>
             </tr>
+            @php $totalT = 0; @endphp
             @foreach ($timeDifferentAreas as $area)
                 <tr align="center">
                     <td>{{ $area->name }}</td>
@@ -196,7 +209,13 @@
                         {{ $area->total ? round(($area->total / $totalTime) * 100, 2) : 0 }}%</td>
                     }}</td>
                 </tr>
+                @php $totalT += $area->total; @endphp
             @endforeach
+            <tr align="center">
+                <th><strong>Total</strong></th>
+                <th><strong>{{ $totalT }}</strong></th>
+                <th><strong>{{ $totalTime ? round(($totalT / $totalTime) * 100, 2) : 0 }}%</strong></th>
+            </tr>
         </table>
     </div>
     <div class="table-section bill-tbl w-100 mt-10">
@@ -206,15 +225,22 @@
                 <th class="w-15">Horas</th>
                 <th class="w-15">% del total</th>
             </tr>
+            @php $totalTR = 0; @endphp
             @foreach ($timeDifferentReasonVisit as $reason)
                 <tr align="center">
-                    <td>{{ $reason->name }}</td>
-                    <td>{{ $reason->total ? $reason->total : 0 }}</td>
+                    <td>{{ $reason['name'] }}</td>
+                    <td>{{ $reason['total'] ? $reason['total'] : 0 }}</td>
                     <td>
-                        {{ $reason->total ? round(($reason->total / $totalTime) * 100, 2) : 0 }}%</td>
+                        {{ $reason['total'] ? round(($reason['total'] / $timeTotalReason) * 100, 2) : 0 }}%</td>
                     }}</td>
                 </tr>
+                @php $totalTR += $reason['total']; @endphp
             @endforeach
+            <tr align="center">
+                <th><strong>Total</strong></th>
+                <th><strong>{{ $totalTR }}</strong></th>
+                <th><strong>{{ $timeTotalReason ? round(($totalTR / $timeTotalReason) * 100, 2) : 0 }}%</strong></th>
+            </tr>
         </table>
     </div>
 
@@ -249,21 +275,6 @@
         </table>
 
         <div style="clear: both;"></div>
-
-        <table class="table w-48 mt-10" style="float: right; margin: -50px 0px 0 0">
-            <tr>
-                <th class="w-50">Reservas por estado</th>
-                <th class="w-15">Total</th>
-            </tr>
-            <tr align="center">
-                <td>Ejecutadas</td>
-                <td>{{ $totalBookingsD }}</td>
-            </tr>
-            <tr align="center">
-                <td>Canceladas</td>
-                <td>{{ $totalBookingsC }}</td>
-            </tr>
-        </table>
     </div>
 
     <div style="clear: both;"></div>

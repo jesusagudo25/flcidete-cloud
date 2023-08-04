@@ -26,7 +26,7 @@ class SubsidiaryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Subsidiary::create($request->all());
     }
 
     /**
@@ -69,7 +69,7 @@ class SubsidiaryController extends Controller
      */
     public function update(Request $request, Subsidiary $subsidiary)
     {
-        //
+        Subsidiary::where('id', $subsidiary->id)->update($request->all());
     }
 
     /**

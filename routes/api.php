@@ -70,6 +70,7 @@ Route::controller(AuthController::class)->group(function(){
     Route::post('/login', 'login');
     Route::post('/forgot-password', 'forgotPassword');
     Route::post('/reset-password', 'resetPassword');
+    Route::get('/validate-token-access', 'validateTokenAccess');
 });
 
 Route::controller(AreaController::class)->group(function(){
@@ -100,6 +101,7 @@ Route::controller(CustomerController::class)->group(function(){
     Route::get('/customers', 'index');
     Route::get('/customers/download', 'template');
     Route::get('/customers/{customer}', 'show');
+    Route::get('/customers/{customer}/subsidiaries', 'subsidiaries');
     Route::get('/customers/{type}/{search}/', 'search');
     Route::get('/customers/v/{type}/{search}/', 'isExist');
     Route::post('/customers/check-email', 'validateEmail');
@@ -139,10 +141,9 @@ Route::controller(VisitController::class)->group(function(){
     Route::put('/visits/{visit}', 'update');
     Route::put('/visits/{visit}/areas', 'updateAreas');
 
-    Route::put('/visits/{visit}/customers', 'updateCustomers');
     Route::delete('/visits/{visit}', 'destroy');
     Route::get('/visits/{visit}/area/{area}', 'destroyAreas');
-    Route::get('/visits/{visit}/customer/{area}', 'destroyCustomers');
+    Route::put('/visits/{visit}/customers', 'destroyCustomers');
 
     Route::post('/visits/areas/update', 'updateAllAreas');
     Route::post('/visits/areas/delete', 'destroyAllAreas');
@@ -277,23 +278,6 @@ Route::controller(ResinUpdateController::class)->group(function(){
     Route::post('/resins-updates', 'store');
     Route::put('/resins-updates/{resinUpdate}', 'update');
     Route::delete('/resins-updates/{resinUpdate}', 'destroy');
-});
-
-Route::controller(ThreadController::class)->group(function(){
-    Route::get('/threads', 'index');
-    Route::get('/threads/{thread}', 'show');
-    Route::get('/threads/s/{search}/', 'search');
-    Route::post('/threads', 'store');
-    Route::put('/threads/{thread}', 'update');
-    Route::delete('/threads/{thread}', 'destroy');
-});
-
-Route::controller(ThreadUpdateController::class)->group(function(){
-    Route::get('/threads-updates', 'index');
-    Route::get('/threads-updates/{threadUpdate}', 'show');
-    Route::post('/threads-updates', 'store');
-    Route::put('/threads-updates/{threadUpdate}', 'update');
-    Route::delete('/threads-updates/{threadUpdate}', 'destroy');
 });
 
 Route::controller(EventController::class)->group(function(){

@@ -24,4 +24,9 @@ class Subsidiary extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }

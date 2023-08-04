@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class SUMResin extends Pivot
 {
-    //
+    protected $table = 'sum_resin';
 }

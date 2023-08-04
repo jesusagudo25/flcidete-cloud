@@ -78,22 +78,43 @@ class VinylController extends Controller
      */
     public function update(Request $request, Vinyl $vinyl)
     {
+        if ($request->has('active') && count($request->all()) == 1) {
+            Vinyl::where('id', $vinyl->id)
+                ->update([
+                    'active' => $request->active
+                ]);
+
+            return response()->json([
+                'message' => 'Vinyl updated successfully'
+            ], 200);
+        }
+
         $vinylUpdates = $vinyl->vinylUpdates()->where('active', 1)->count();
 
-        if($vinylUpdates > 0){
-            if($request->width != $vinyl->width || $request->height != $vinyl->height){
+        if ($vinylUpdates > 0) {
+            if ($request->width != $vinyl->width || $request->height != $vinyl->height) {
                 Vinyl::where('id', $vinyl->id)
-                ->update($request->all());
-    
-                $vinyl->area = ($request->area ) * $vinylUpdates;
-    
+                    ->update($request->all());
+
+                $vinyl->area = ($request->area) * $vinylUpdates;
+
                 $vinyl::where('id', $vinyl->id)
-                ->update([
-                    'area' => $vinyl->area
-                ]);
-            }
-            else{
+                    ->update([
+                        'area' => $vinyl->area
+                    ]);
+            } else {
                 Vinyl::where('id', $vinyl->id)
+                    ->update([
+                        'name' => $request->name,
+                        'cost' => $request->cost,
+                        'purchase_price' => $request->purchase_price,
+                        'estimated_value' => $request->estimated_value,
+                        'percentage' => $request->percentage,
+                        'sale_price' => $request->sale_price,
+                    ]);
+            }
+        } else {
+            Vinyl::where('id', $vinyl->id)
                 ->update([
                     'name' => $request->name,
                     'cost' => $request->cost,
@@ -101,24 +122,11 @@ class VinylController extends Controller
                     'estimated_value' => $request->estimated_value,
                     'percentage' => $request->percentage,
                     'sale_price' => $request->sale_price,
+                    'width' => $request->width,
+                    'height' => $request->height,
+                    'height_in_feet' => $request->height_in_feet,
                 ]);
-            }
         }
-        else{
-            Vinyl::where('id', $vinyl->id)
-            ->update([
-                'name' => $request->name,
-                'cost' => $request->cost,
-                'purchase_price' => $request->purchase_price,
-                'estimated_value' => $request->estimated_value,
-                'percentage' => $request->percentage,
-                'sale_price' => $request->sale_price,
-                'width' => $request->width,
-                'height' => $request->height,
-                'height_in_feet' => $request->height_in_feet,
-            ]);
-        }
-        
     }
 
     /**

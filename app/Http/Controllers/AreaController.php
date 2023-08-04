@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AgeRange;
 use App\Models\Area;
 use App\Models\Customer;
 use App\Models\Event;
@@ -87,149 +88,51 @@ class AreaController extends Controller
     {
 
         //Get first day month
-        $firstDayMonth = date('Y-m-01');
+        $firstDayMonth = date('Y-m-01 00:00:00');
         $lastDayMonthCurrent = date('Y-m-t 23:59:59');
 
         /* Ventas mensuales */
 
-        $invoicesMonth = Invoice::whereBetween('created_at', [$firstDayMonth, $lastDayMonthCurrent])->where('status', 'F')->sum('total');
+        $invoicesMonth = Invoice::whereBetween('created_at', [$firstDayMonth, $lastDayMonthCurrent])->where([
+            ['status', 'F'],
+            ['is_active', 1]
+        ])->sum('total');
 
         /* Nuevos clientes */
 
-        $newCustomers = Customer::whereBetween('created_at', [$firstDayMonth, $lastDayMonthCurrent])->count();
+        $newCustomers = Customer::whereBetween('created_at', [$firstDayMonth, $lastDayMonthCurrent])->where('active', 1)->count();
 
-        /* Pagos en curso */
+        /* Vistas del mes */
 
-        $payments = Invoice::whereBetween('created_at', [$firstDayMonth, $lastDayMonthCurrent])->where([
-            ['type_invoice', '=', 'A'],
-            ['status', '=', 'A'],
-        ])->count();
+        $visitsMonth = Visit::whereBetween('created_at', [$firstDayMonth, $lastDayMonthCurrent])->where('active', 1)->count();
 
         /* Gastos técnicos */
 
-        $expenses = TechExpense::whereBetween('created_at', [$firstDayMonth, $lastDayMonthCurrent])->sum('amount');
-
+        $expenses = TechExpense::whereBetween('created_at', [$firstDayMonth, $lastDayMonthCurrent])->where('active', 1)->sum('amount');
 
         /* Ingresos y gastos por mes*/
-        $previousMonths = [];
-        $previousMonthLabels = [];
-        $nextMonths = [];
+        $report = new Report();
 
-        if (date('m') == 1) {
-            /* next */
-            foreach (range(2, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 2) {
-            /* Previous */
-            foreach (range(1, 1) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(3, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 3) {
-            /* Previous */
-            foreach (range(1, 2) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(4, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 4) {
-            /* Previous */
-            foreach (range(1, 3) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(5, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 5) {
-            /* Previous */
-            foreach (range(1, 4) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(6, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 6) {
-            /* Previous */
-            foreach (range(1, 5) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(7, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 7) {
-            /* Previous */
-            foreach (range(1, 6) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(8, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 8) {
-            /* Previous */
-            foreach (range(1, 7) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(9, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 9) {
-            /* Previous */
-            foreach (range(1, 8) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(10, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 10) {
-            /* Previous */
-            foreach (range(1, 9) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(11, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 11) {
-            /* Previous */
-            foreach (range(1, 10) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " -$month months"));
-            }
-            /* next */
-            foreach (range(12, 12) as $month) {
-                $nextMonths[] = date('Y-m-d', strtotime(date('Y-m-01') . " +$month months"));
-            }
-        } else if (date('m') == 12) {
-            /* Previous */
-            foreach (range(0, 11) as $month) {
-                $previousMonths[] = date('Y-m-d', strtotime(date('Y-01-01') . " +$month months"));
-                //mm/dd/yyyy
-                $previousMonthLabels[] = date('m/d/Y', strtotime(date('Y-01-15') . " +$month months"));
-            }
+        $year = date('Y');
+
+        $firstDaysOfMonth = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $firstDay = date("Y-m-01", strtotime("$year-$month-01"));
+            $firstDaysOfMonth[] = $firstDay;
         }
 
         $total = [];
-        $report = new Report();
 
-        foreach ($previousMonths as $previousMonth) {
-            /* last day date */
-            $lastDayMonth = date('Y-m-t', strtotime($previousMonth));
-            $total[] = $report->getIncomeAndExpensesByMonth($previousMonth, $lastDayMonth);
+        //Recorremos los meses
+        foreach ($firstDaysOfMonth as $firstDay) {
+            $lastDay = date('Y-m-t', strtotime($firstDay));
+            
+            $total[] = $report->getIncomeAndExpensesByMonth($firstDay, $lastDay);
         }
 
         $incomeExpenses = [
-            'labels' => $previousMonthLabels,
+            'labels' => $firstDaysOfMonth,
             'data' => $total
         ];
 
@@ -243,13 +146,15 @@ class AreaController extends Controller
             ->groupBy('area_visit.area_id')
             ->orderBy('total', 'desc')
             ->get()->take(4);
-        
-        
-    
-        if($timeDifferentAreas->sum('total') == 0){
-            $areasPercentage = [];
-        }
-        else{
+
+        if ($timeDifferentAreas->sum('total') == 0) {
+            $areasPercentage = [
+                [
+                    'name' => 'No hay datos',
+                    'percentage' => 0
+                ]
+            ];
+        } else {
             $areasPercentage = $timeDifferentAreas->map(function ($item, $key) use ($timeDifferentAreas) {
                 $item->percentage = round(($item->total * 100) / $timeDifferentAreas->sum('total'), 1);
                 return $item;
@@ -257,7 +162,6 @@ class AreaController extends Controller
         }
 
         /* Distritos frecuentes  --------------  */
-        /* Por reparar: Hubo cambios en la tabla customers y subsidiaries */
         $districtsTop = Visit::whereBetween('visits.created_at', [$firstDayMonth, $lastDayMonthCurrent])
             ->where('visits.active', 1)
             ->join('customer_visit', 'visits.id', '=', 'customer_visit.visit_id')
@@ -268,12 +172,18 @@ class AreaController extends Controller
             ->limit(5)
             ->get();
 
-/*         $districts = Http::get(config('config.geoptyapi').'/api/districts')->collect();
+        if ($districtsTop->count() == 0) {
+            $districtsTop = [
+                ['district_id' => 'No hay datos', 'total' => 0]
+            ];
+        } else {
+            $districts = Http::get(config('config.geoptyapi') . '/api/districts')->collect();
 
-        foreach ($districtsTop as $districtTop) {
-            $result = $districts->where('id', $districtTop->district_id)->first();
-            $districtTop->district_id = $result['name'];
-        } */
+            foreach ($districtsTop as $districtTop) {
+                $result = $districts->where('id', $districtTop->district_id)->first();
+                $districtTop->district_id = $result['name'];
+            }
+        }
 
         /* Frecuencia de visitantes por género y edad  -------------- */
         $ageRangeByM = Visit::whereBetween('visits.created_at', [$firstDayMonth, $lastDayMonthCurrent])
@@ -301,17 +211,23 @@ class AreaController extends Controller
             ->groupBy('customers.age_range_id')
             ->orderBy('age_ranges.id', 'asc')
             ->get();
-        
-     return response()->json([
+
+        $ageRangesNotShowByM = AgeRange::whereNotIn('id', $ageRangeByM->pluck('id'))->selectRaw('id, name, 0 as total')->get();
+        $ageRangesNotShowByF = AgeRange::whereNotIn('id', $ageRangeByF->pluck('id'))->selectRaw('id, name, 0 as total')->get();
+
+        $ageRangeByF = $ageRangeByF->merge($ageRangesNotShowByF);
+        $ageRangeByM = $ageRangeByM->merge($ageRangesNotShowByM);
+
+        return response()->json([
             'invoicesMonth' => $invoicesMonth,
             'newCustomers' => $newCustomers,
-            'payments' => $payments,
+            'visitsMonth' => $visitsMonth,
             'expenses' => $expenses,
             'incomeExpenses' => $incomeExpenses,
             'areasPercentage' => $areasPercentage,
             'districtsTop' => $districtsTop,
             'ageRangeByM' => $ageRangeByM,
             'ageRangeByF' => $ageRangeByF,
-        ]);      
+        ]);
     }
 }

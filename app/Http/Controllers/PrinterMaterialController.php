@@ -37,15 +37,14 @@ class PrinterMaterialController extends Controller
         if ($request->has('quantity')) {
             $quantity = $request->quantity;
             for ($i = 0; $i < $quantity; $i++) {
-                $printerMaterial->printerMaterialUpdates()->
-                create([
-                    'printer_material_id' => $printerMaterial->id,
-                    'cost' => $request->cost,
-                    'purchase_price' => $request->purchase_price,
-                    'estimated_value' => $request->estimated_value,
-                    'percentage' => $request->percentage,
-                    'sale_price' => $request->sale_price,
-                ]);
+                $printerMaterial->printerMaterialUpdates()->create([
+                        'printer_material_id' => $printerMaterial->id,
+                        'cost' => $request->cost,
+                        'purchase_price' => $request->purchase_price,
+                        'estimated_value' => $request->estimated_value,
+                        'percentage' => $request->percentage,
+                        'sale_price' => $request->sale_price,
+                    ]);
             }
         }
     }
@@ -63,8 +62,10 @@ class PrinterMaterialController extends Controller
 
     public function search($search)
     {
-        $printerMaterial = PrinterMaterial::where('name', 'like', '%' . $search . '%')
-            ->get();
+        $printerMaterial = PrinterMaterial::where([
+            ['name', 'like', '%' . $search . '%'],
+            ['active', '=', 1]
+        ])->get();
 
         return $printerMaterial;
     }
@@ -78,22 +79,43 @@ class PrinterMaterialController extends Controller
      */
     public function update(Request $request, PrinterMaterial $printerMaterial)
     {
+        if ($request->has('active') && count($request->all()) == 1) {
+            PrinterMaterial::where('id', $printerMaterial->id)
+                ->update([
+                    'active' => $request->active
+                ]);
+
+            return response()->json([
+                'message' => 'Printer Material updated successfully'
+            ], 200);
+        }
+
         $printerMaterialUpdates = $printerMaterial->printerMaterialUpdates()->where('active', 1)->count();
 
-        if($printerMaterialUpdates > 0){
-            if($request->width != $printerMaterial->width || $request->height != $printerMaterial->height){
+        if ($printerMaterialUpdates > 0) {
+            if ($request->width != $printerMaterial->width || $request->height != $printerMaterial->height) {
                 PrinterMaterial::where('id', $printerMaterial->id)
-                ->update($request->all());
-    
-                $printerMaterial->area = ($request->area ) * $printerMaterialUpdates;
-    
+                    ->update($request->all());
+
+                $printerMaterial->area = ($request->area) * $printerMaterialUpdates;
+
                 $printerMaterial::where('id', $printerMaterial->id)
-                ->update([
-                    'area' => $printerMaterial->area,
-                ]);
-            }
-            else{
+                    ->update([
+                        'area' => $printerMaterial->area,
+                    ]);
+            } else {
                 PrinterMaterial::where('id', $printerMaterial->id)
+                    ->update([
+                        'name' => $request->name,
+                        'cost' => $request->cost,
+                        'purchase_price' => $request->purchase_price,
+                        'estimated_value' => $request->estimated_value,
+                        'percentage' => $request->percentage,
+                        'sale_price' => $request->sale_price,
+                    ]);
+            }
+        } else {
+            PrinterMaterial::where('id', $printerMaterial->id)
                 ->update([
                     'name' => $request->name,
                     'cost' => $request->cost,
@@ -101,25 +123,12 @@ class PrinterMaterialController extends Controller
                     'estimated_value' => $request->estimated_value,
                     'percentage' => $request->percentage,
                     'sale_price' => $request->sale_price,
+                    'width' => $request->width,
+                    'width_in_inches' => $request->width_in_inches,
+                    'height' => $request->height,
+                    'height_in_meters' => $request->height_in_meters,
                 ]);
-            }
         }
-        else{
-            PrinterMaterial::where('id', $printerMaterial->id)
-            ->update([
-                'name' => $request->name,
-                'cost' => $request->cost,
-                'purchase_price' => $request->purchase_price,
-                'estimated_value' => $request->estimated_value,
-                'percentage' => $request->percentage,
-                'sale_price' => $request->sale_price,
-                'width' => $request->width,
-                'width_in_inches' => $request->width_in_inches,
-                'height' => $request->height,
-                'height_in_meters' => $request->height_in_meters,
-            ]);
-        }
-        
     }
 
     /**

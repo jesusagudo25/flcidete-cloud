@@ -20,6 +20,7 @@ return new class extends Migration
                 ->onUpdate('cascade');
             $table->decimal('cost', 10, 2);
             $table->decimal('estimated_value', 10, 2);
+            $table->decimal('purchase_price', 5, 3);
             $table->decimal('sale_price', 5, 2);
             $table->boolean('active')->default(true);
             $table->timestamps();

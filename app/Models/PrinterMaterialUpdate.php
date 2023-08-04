@@ -13,6 +13,7 @@ class PrinterMaterialUpdate extends Model
         'printer_material_id',
         'cost',
         'estimated_value',
+        'purchase_price',
         'sale_price',
         'active',
     ];

@@ -28,7 +28,7 @@ class Visit extends Model
 
     public function areas()
     {
-        return $this->belongsToMany(Area::class);
+        return $this->belongsToMany(Area::class)->withPivot('area_id', 'visit_id', 'start_time', 'end_time');
     }
 
 }

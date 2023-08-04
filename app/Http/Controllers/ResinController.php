@@ -86,7 +86,20 @@ class ResinController extends Controller
      */
     public function update(Request $request, Resin $resin)
     {
+        if ($request->has('active') && count($request->all()) == 1) {
+            Resin::where('id', $resin->id)
+            ->update([
+                'active' => $request->active
+            ]);
+
+            return response()->json([
+                'message' => 'Resin updated successfully'
+            ], 200);
+
+        }
+
         $resinUpdates = $resin->resinUpdates()->where('active',1)->count();
+        
         if($resinUpdates > 0){
             if($request->purchased_weight != $resin->purchased_weight){
                 Resin::where('id', $resin->id)->update($request->all());

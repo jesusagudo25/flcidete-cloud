@@ -32,7 +32,6 @@ return new class extends Migration
             $table->decimal('extra', 8, 2)->nullable();
             $table->text('extra_description')->nullable();
             $table->decimal('base_cost', 10, 2);
-            $table->timestamps();
         });
     }
 
